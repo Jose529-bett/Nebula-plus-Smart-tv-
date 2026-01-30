@@ -11,9 +11,13 @@
 </head>
 <body>
 
-    <div class="admin-trigger" onclick="abrirAdmin()"></div>
+    <div id="intro-layer" class="intro-overlay">
+        <video id="intro-video" autoplay muted playsinline>
+            <source src="https://archive.org/download/k2t97yzrh9rmy0cw1kqs3e2yx8_result__202601/k2t97yzrh9rmy0cw1kqs3e2yx8_result_.ia.mp4" type="video/mp4">
+        </video>
+    </div>
 
-    <div id="sc-login" class="screen">
+    <div id="sc-login" class="screen hidden">
         <div class="login-container">
             <h1 class="logo-title">NEBULA<span>+</span></h1>
             <input type="text" id="log-u" placeholder="Usuario" tabindex="1">
@@ -22,90 +26,36 @@
         </div>
     </div>
 
-    <div id="sc-admin" class="screen hidden">
-        <div class="admin-nav">
-            <h2>Panel de Control</h2>
-            <button class="btn-red" onclick="switchScreen('sc-main')">VOLVER</button>
-        </div>
-        <div class="admin-grid">
-            <div class="admin-card">
-                <h3>Usuarios</h3>
-                <input type="text" id="adm-un" placeholder="Nombre">
-                <input type="text" id="adm-up" placeholder="PIN">
-                <input type="date" id="adm-ud">
-                <button class="btn-blue" onclick="guardarUser()">Guardar</button>
-                <div class="table-scroll"><table id="user-list"></table></div>
-            </div>
-            <div class="admin-card">
-                <h3>Contenido</h3>
-                <input type="text" id="c-title" placeholder="Título">
-                <input type="text" id="c-post" placeholder="URL Poster">
-                <input type="text" id="c-video" placeholder="Link .mp4 o .m3u8">
-                <div class="row">
-                    <select id="c-brand">
-                        <option value="disney">Disney</option>
-                        <option value="netflix">Netflix</option>
-                        <option value="hbo">HBO Max</option>
-                        <option value="paramount">Paramount</option>
-                        <option value="apple">Apple TV</option>
-                        <option value="espn">ESPN</option>
-                        <option value="natgeo">NAT GEO</option>
-                    </select>
-                    <select id="c-type">
-                        <option value="pelicula">Película</option>
-                        <option value="serie">Serie</option>
-                    </select>
-                </div>
-                <button class="btn-blue" style="background:#28a745" onclick="guardarContenido()">PUBLICAR</button>
-                <div class="table-scroll"><table id="movie-list"></table></div>
-            </div>
-        </div>
-    </div>
-
     <div id="sc-main" class="screen hidden">
         <nav class="navbar">
             <div class="nav-top">
                 <span class="logo-s">NEBULA+</span>
-                <input type="text" id="search-box" placeholder="Buscar..." onkeyup="buscar()" tabindex="4">
-                <button class="avatar" onclick="toggleMenu()" tabindex="5">👤</button>
-                <div id="drop-menu" class="dropdown hidden">
-                    <p id="u-name"></p>
-                    <button class="btn-logout" onclick="cerrarSesion()">Salir</button>
+                <div class="brand-bar">
+                    <button onclick="seleccionarMarca('disney')" tabindex="4">DISNEY</button>
+                    <button onclick="seleccionarMarca('netflix')" tabindex="5">NETFLIX</button>
+                    <button onclick="seleccionarMarca('hbo')" tabindex="6">HBO MAX</button>
+                    <button onclick="seleccionarMarca('paramount')" tabindex="7">PARAMOUNT</button>
+                    <button onclick="seleccionarMarca('apple')" tabindex="10">APPLE TV</button>
                 </div>
             </div>
-            <div class="brand-bar" id="brand-bar">
-                <button onclick="seleccionarMarca('disney')" tabindex="6">DISNEY</button>
-                <button onclick="seleccionarMarca('netflix')" tabindex="7">NETFLIX</button>
-                <button onclick="seleccionarMarca('hbo')" tabindex="8">HBO MAX</button>
-                <button onclick="seleccionarMarca('paramount')" tabindex="9">PARAMOUNT</button>
-                <button onclick="seleccionarMarca('apple')" tabindex="10">APPLE TV</button>
-                <button onclick="seleccionarMarca('espn')" tabindex="11">ESPN</button>
-                <button onclick="seleccionarMarca('natgeo')" tabindex="12">NAT GEO</button>
+            <div class="tabs">
+                <button id="t-peli" class="active" onclick="cambiarTipo('pelicula')" tabindex="8">PELÍCULAS</button>
+                <button id="t-serie" onclick="cambiarTipo('serie')" tabindex="9">SERIES</button>
             </div>
         </nav>
         <div class="main-content">
-            <div class="tabs">
-                <button id="t-peli" class="active" onclick="cambiarTipo('pelicula')" tabindex="13">PELÍCULAS</button>
-                <button id="t-serie" onclick="cambiarTipo('serie')" tabindex="14">SERIES</button>
-            </div>
             <h2 id="cat-title">CATÁLOGO</h2>
             <div id="grid" class="movie-grid"></div>
         </div>
     </div>
 
     <div id="video-player" class="player-overlay hidden">
-        <div class="player-container">
-            <button class="close-player" id="btn-close-p" onclick="cerrarReproductor()">✕ CERRAR</button>
-            <div class="video-frame"></div>
-            <h2 id="player-title">Título</h2>
-            <div id="serie-controls" class="hidden">
-                <h3>Temporadas</h3>
-                <select id="season-selector" onchange="cargarTemporada(this.value)"></select>
-                <div id="episodes-grid" class="episodes-grid"></div>
-            </div>
-        </div>
+        <button class="close-player" id="btn-close" onclick="cerrarReproductor()">✕ VOLVER</button>
+        <div class="video-frame"></div>
+        <h2 id="player-title" class="p-title">Reproduciendo...</h2>
     </div>
 
     <script src="script.js"></script>
 </body>
 </html>
+
