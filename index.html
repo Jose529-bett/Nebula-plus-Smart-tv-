@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nebula+ TV Premium</title>
+    <title>Nebula+ TV Hybrid</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -11,73 +11,72 @@
 </head>
 <body>
 
-    <div class="admin-trigger" onclick="abrirAdmin()"></div>
-
     <div id="sc-login" class="screen">
         <div class="login-container">
             <h1 class="logo-title">NEBULA<span>+</span></h1>
-            <input type="text" id="log-u" placeholder="Usuario" tabindex="0">
-            <input type="password" id="log-p" placeholder="PIN" tabindex="0">
-            <button class="btn-blue" onclick="entrar()" tabindex="0">ENTRAR</button>
+            <input type="text" id="log-u" placeholder="Usuario" tabindex="1">
+            <input type="password" id="log-p" placeholder="Contraseña" tabindex="2">
+            <button class="btn-blue" onclick="entrar()" tabindex="3">ENTRAR</button>
         </div>
     </div>
 
     <div id="sc-main" class="screen hidden">
-        <aside class="sidebar">
-            <h2 class="logo-s">NEBULA<span>+</span></h2>
-            <div class="menu-section">
-                <button id="t-peli" class="nav-item active" onclick="cambiarTipo('pelicula')" tabindex="0">PELÍCULAS</button>
-                <button id="t-serie" class="nav-item" onclick="cambiarTipo('serie')" tabindex="0">SERIES</button>
+        <nav class="navbar">
+            <div class="nav-top">
+                <span class="logo-s">NEBULA+</span>
+                <input type="text" id="search-box" placeholder="Buscar..." onkeyup="buscar()" tabindex="4">
+                <button class="avatar" onclick="abrirAdmin()" tabindex="5">👤</button>
             </div>
-            <div class="menu-section">
-                <p class="label">MARCAS</p>
-                <button class="btn-b" onclick="seleccionarMarca('disney')" tabindex="0">DISNEY</button>
-                <button class="btn-b" onclick="seleccionarMarca('netflix')" tabindex="0">NETFLIX</button>
-                <button class="btn-b" onclick="seleccionarMarca('hbo')" tabindex="0">HBO MAX</button>
-                <button class="btn-b" onclick="seleccionarMarca('espn')" tabindex="0">ESPN LIVE</button>
+            
+            <div class="brand-bar" id="brand-container">
+                <button class="brand-btn" onclick="seleccionarMarca('disney')" tabindex="6">DISNEY</button>
+                <button class="brand-btn" onclick="seleccionarMarca('netflix')" tabindex="7">NETFLIX</button>
+                <button class="brand-btn" onclick="seleccionarMarca('hbo')" tabindex="8">HBO MAX</button>
+                <button class="brand-btn" onclick="seleccionarMarca('paramount')" tabindex="9">PARAMOUNT</button>
+                <button class="brand-btn" onclick="seleccionarMarca('apple')" tabindex="10">APPLE TV</button>
+                <button class="brand-btn" onclick="seleccionarMarca('espn')" tabindex="11">ESPN</button>
             </div>
-            <button class="btn-logout" onclick="cerrarSesion()" tabindex="0">SALIR</button>
-        </aside>
+        </nav>
 
-        <main class="content">
-            <header>
-                <h2 id="cat-title">CATÁLOGO</h2>
-                <input type="text" id="search-box" placeholder="Buscar..." onkeyup="buscar()" tabindex="0">
-            </header>
+        <div class="main-content">
+            <div class="tabs">
+                <button id="t-peli" class="active" onclick="cambiarTipo('pelicula')" tabindex="12">PELÍCULAS</button>
+                <button id="t-serie" onclick="cambiarTipo('serie')" tabindex="13">SERIES</button>
+            </div>
+            <h2 id="cat-title">CATÁLOGO</h2>
             <div id="grid" class="movie-grid"></div>
-        </main>
-    </div>
-
-    <div id="video-player" class="player-overlay hidden">
-        <button class="close-player" onclick="cerrarReproductor()" tabindex="0">✕ CERRAR</button>
-        <div class="video-frame"></div>
-        <div class="player-info">
-            <h2 id="player-title">Título</h2>
-            <div id="serie-controls" class="hidden">
-                <select id="season-selector" onchange="cargarTemporada(this.value)" tabindex="0"></select>
-                <div id="episodes-grid" class="episodes-grid"></div>
-            </div>
         </div>
     </div>
 
-    <div id="sc-admin" class="screen hidden">
-        <div class="admin-panel">
-            <button onclick="switchScreen('sc-main')" tabindex="0">VOLVER</button>
-            <input type="text" id="c-title" placeholder="Título">
-            <input type="text" id="c-post" placeholder="URL Poster">
-            <input type="text" id="c-video" placeholder="Link (L1, L2 | L3)">
-            <select id="c-brand">
-                <option value="disney">Disney</option>
-                <option value="netflix">Netflix</option>
-                <option value="hbo">HBO Max</option>
-                <option value="espn">ESPN</option>
-            </select>
-            <select id="c-type">
-                <option value="pelicula">Película</option>
-                <option value="serie">Serie</option>
-            </select>
-            <button class="btn-blue" onclick="guardarContenido()" tabindex="0">PUBLICAR</button>
-            <div class="table-scroll"><table id="movie-list"></table></div>
+    <div id="video-player" class="player-overlay hidden">
+        <div id="loading-screen" class="loading-overlay">
+            <div class="loader-content">
+                <h1 class="logo-title pulse">NEBULA<span>+</span></h1>
+                <p>Cargando contenido...</p>
+                <div class="spinner"></div>
+            </div>
+        </div>
+        
+        <div class="video-container" id="video-container">
+            <div class="video-frame"></div>
+            <div class="google-controls">
+                <div class="top-info">
+                    <h2 id="player-title">Título</h2>
+                    <button class="google-close" onclick="cerrarReproductor()" tabindex="20">✕ SALIR</button>
+                </div>
+                <div class="center-controls">
+                    <button class="control-btn" onclick="skip(-10)" tabindex="21">⏪</button>
+                    <button id="play-pause" class="control-btn play-main" onclick="togglePlay()" tabindex="22">⏸</button>
+                    <button class="control-btn" onclick="skip(10)" tabindex="23">⏩</button>
+                </div>
+                <div class="bottom-controls">
+                    <div class="progress-container"><div id="progress-bar" class="progress-bar"></div></div>
+                    <div id="serie-controls" class="hidden">
+                        <select id="season-selector" onchange="cargarTemporada(this.value)" tabindex="24"></select>
+                        <div id="episodes-grid" class="episodes-grid"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
