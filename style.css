@@ -1,13 +1,13 @@
 :root { --bg: #050a12; --blue: #0063e5; --card: #1a1d29; }
-body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; width: 100vw; height: 100vh; }
+body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow-x: hidden; width: 100vw; height: 100vh; }
 .hidden { display: none !important; }
 
-/* Intro Adaptada */
+/* Intro */
 .intro-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 99999; display: flex; transition: opacity 0.8s ease; }
 .intro-overlay video { width: 100%; height: 100%; object-fit: cover; }
 
-/* Enfoque del mando (Crucial para TV) */
-:focus { outline: none; border: 3px solid white !important; transform: scale(1.05); background: #2a2f3e !important; }
+/* Enfoque del mando */
+:focus { outline: none; border: 3px solid white !important; transform: scale(1.03); background: var(--blue) !important; color: white !important; }
 
 .login-container { width: 380px; margin: 7% auto; text-align: center; }
 .logo-title { font-size: 3.5rem; font-weight: bold; margin-bottom: 20px; }
@@ -16,13 +16,12 @@ body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif;
 input { background: #121926; color: white; border: 1px solid #31343e; padding: 12px; width: 100%; border-radius: 8px; margin-bottom: 10px; font-size: 1rem; }
 .btn-blue { background: var(--blue); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
 
-/* Estilo Navbar */
+/* Navbar */
 .navbar { padding: 15px 40px; background: #050a12; border-bottom: 1px solid #1e2736; }
 .nav-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
 #search-input { width: 45%; margin: 0; }
 .btn-exit { background: #e50914; color: white; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
 
-/* Marcas y Categorías */
 .brand-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; }
 .brand-bar button { background: var(--card); color: white; border: 1px solid #31343e; padding: 8px 12px; border-radius: 4px; font-size: 0.8rem; min-width: 105px; transition: 0.2s; }
 
@@ -35,31 +34,17 @@ input { background: #121926; color: white; border: 1px solid #31343e; padding: 1
 .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 20px; padding: 20px 40px; height: 55vh; overflow-y: auto; }
 .poster { width: 100%; aspect-ratio: 2/3; border-radius: 10px; background-size: cover; background-position: center; border: 3px solid transparent; cursor: pointer; transition: 0.3s; }
 
-/* REPRODUCTOR MEJORADO PARA SERIES */
-.player-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 9999; display: flex; flex-direction: column; }
-
-.player-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent); }
-
-.player-wrapper { display: flex; flex: 1; overflow: hidden; }
-
-.video-frame { flex: 1; background: #000; position: relative; }
+/* REPRODUCTOR ESTILO TV */
+.player-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #050a12; z-index: 9999; overflow-y: auto; display: flex; flex-direction: column; }
+.player-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; background: rgba(0,0,0,0.8); }
+.player-wrapper { display: flex; flex-direction: column; width: 100%; }
+.video-frame { width: 100%; aspect-ratio: 16/9; background: #000; }
 .video-frame video { width: 100%; height: 100%; }
 
-/* Barra Lateral de Capítulos */
-.serie-sidebar { width: 320px; background: rgba(10, 15, 25, 0.95); border-left: 2px solid var(--blue); display: flex; flex-direction: column; padding: 20px; box-shadow: -10px 0 20px rgba(0,0,0,0.5); }
+.serie-sidebar { padding: 40px; background: linear-gradient(to bottom, #1a1d29, #050a12); }
+.sidebar-title { font-size: 1.8rem; color: var(--blue); font-weight: bold; margin-bottom: 20px; }
+#season-selector { background: #1a1d29; color: white; border: 2px solid #31343e; padding: 15px; border-radius: 8px; font-size: 1.2rem; margin-bottom: 30px; width: 300px; }
 
-.sidebar-title { font-size: 0.9rem; color: var(--blue); text-transform: uppercase; margin-bottom: 10px; letter-spacing: 1px; }
-
-#season-selector { background: #1a1d29; color: white; border: 1px solid #31343e; padding: 12px; border-radius: 5px; font-size: 1rem; margin-bottom: 20px; width: 100%; }
-
-.chapters-grid { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 5px; }
-
-/* Botones de Episodios */
-.btn-cap { background: #1a1d29; color: white; border: 1px solid #31343e; padding: 15px; border-radius: 6px; text-align: left; cursor: pointer; font-size: 0.9rem; transition: 0.2s; }
-
-.close-player { background: #e50914; color: white; padding: 10px 20px; border: none; font-weight: bold; border-radius: 5px; cursor: pointer; }
-.p-title { margin: 0; font-size: 1.5rem; border-left: 5px solid var(--blue); padding-left: 15px; }
-
-/* Scrollbar personalizada para la lista de capítulos */
-.chapters-grid::-webkit-scrollbar { width: 6px; }
-.chapters-grid::-webkit-scrollbar-thumb { background: var(--blue); border-radius: 10px; }
+.chapters-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 100%; max-width: 1100px; }
+.btn-cap-square { background: #1a1d29; color: white; border: 1px solid #31343e; padding: 25px; border-radius: 10px; font-weight: bold; font-size: 1.5rem; text-align: center; cursor: pointer; }
+.close-player { background: #e50914; color: white; padding: 10px 20px; border: none; font-weight: bold; border-radius: 5px; }
