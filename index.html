@@ -18,11 +18,9 @@
     <div id="sc-login" class="screen hidden">
         <div class="login-wrapper">
             <h1 class="logo-main">NEBULA<span>+</span></h1>
-            <div class="login-box">
-                <input type="text" id="log-u" placeholder="Usuario" tabindex="1">
-                <input type="password" id="log-p" placeholder="Contraseña" tabindex="2">
-                <button class="btn-entrar" onclick="validarLogin()" tabindex="3">ENTRAR</button>
-            </div>
+            <input type="text" id="log-u" placeholder="Usuario" tabindex="0">
+            <input type="password" id="log-p" placeholder="Contraseña" tabindex="0">
+            <button class="btn-entrar" onclick="entrar()" tabindex="0">ENTRAR</button>
         </div>
     </div>
 
@@ -30,25 +28,23 @@
         <header class="tv-header">
             <div class="header-top">
                 <span class="logo-s">NEBULA<span>+</span></span>
-                <div class="search-container">
-                    <input type="text" id="tv-search" placeholder="🔍 Buscar..." tabindex="4">
-                </div>
-                <button class="btn-exit" onclick="salirApp()" tabindex="5">SALIR</button>
+                <input type="text" id="tv-search" placeholder="🔍 Buscar..." tabindex="0">
+                <button class="btn-logout" onclick="cerrarSesion()" tabindex="0">CERRAR SESIÓN</button>
             </div>
             
-            <div class="brands-nav">
-                <button class="b-btn" onclick="navMarca('disney')" tabindex="6">DISNEY</button>
-                <button class="b-btn" onclick="navMarca('netflix')" tabindex="7">NETFLIX</button>
-                <button class="b-btn" onclick="navMarca('hbo')" tabindex="8">HBO MAX</button>
-                <button class="b-btn" onclick="navMarca('paramount')" tabindex="9">PARAMOUNT</button>
-                <button class="b-btn" onclick="navMarca('apple')" tabindex="10">APPLE TV</button>
-                <button class="b-btn" onclick="navMarca('espn')" tabindex="11">ESPN</button>
-                <button class="b-btn" onclick="navMarca('natgeo')" tabindex="12">NAT GEO</button>
+            <div class="platforms-row">
+                <button class="plat-btn" onclick="setBrand('disney')" tabindex="0">DISNEY</button>
+                <button class="plat-btn" onclick="setBrand('netflix')" tabindex="0">NETFLIX</button>
+                <button class="plat-btn" onclick="setBrand('hbo')" tabindex="0">HBO MAX</button>
+                <button class="plat-btn" onclick="setBrand('paramount')" tabindex="0">PARAMOUNT</button>
+                <button class="plat-btn" onclick="setBrand('apple')" tabindex="0">APPLE TV</button>
+                <button class="plat-btn" onclick="setBrand('espn')" tabindex="0">ESPN</button>
+                <button class="plat-btn" onclick="setBrand('natgeo')" tabindex="0">NAT GEO</button>
             </div>
 
-            <div class="type-nav">
-                <button id="tab-peli" class="t-btn active" onclick="setFiltroTipo('pelicula')" tabindex="13">PELÍCULAS</button>
-                <button id="tab-serie" class="t-btn" onclick="setFiltroTipo('serie')" tabindex="14">SERIES</button>
+            <div class="type-selector">
+                <button id="btn-peli" class="type-tab active" onclick="setType('pelicula')" tabindex="0">PELÍCULAS</button>
+                <button id="btn-serie" class="type-tab" onclick="setType('serie')" tabindex="0">SERIES</button>
             </div>
         </header>
 
@@ -56,14 +52,16 @@
     </div>
 
     <div id="video-player" class="player-overlay hidden">
-        <div id="v-wrapper" class="full-video"></div>
-        <div class="player-ui">
-            <button class="close-player" onclick="cerrarReproductor()" tabindex="50">✕ CERRAR</button>
-            <div id="loader" class="nebula-ring"></div>
-            <div class="player-footer">
-                <h2 id="v-title">Cargando...</h2>
+        <div id="v-wrapper"></div>
+        <div class="tv-controls">
+            <button class="btn-red-close" onclick="cerrarReproductor()" tabindex="0">✕ CERRAR</button>
+            <div class="nebula-play-container">
+                <button id="p-pause" class="nebula-play-btn" onclick="togglePlay()" tabindex="0">⏸</button>
+            </div>
+            <div class="bot-info">
+                <h2 id="v-titulo">Título</h2>
                 <div id="series-panel" class="hidden">
-                    <div id="ep-list" class="episodes-row"></div>
+                    <div id="ep-list" class="episodes-container"></div>
                 </div>
             </div>
         </div>
