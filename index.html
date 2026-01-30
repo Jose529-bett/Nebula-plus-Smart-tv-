@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nebula+ | Smart TV Edition</title>
+    <title>Nebula+ | Smart TV Pro</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -12,8 +12,8 @@
 <body>
 
     <div id="intro-layer" class="intro-overlay">
-        <video id="intro-video" autoplay playsinline>
-            <source src="https://archive.org/download/k2t97yzrh9rmy0cw1kqs3e2yx8_result__202601/k2t97yxrh9rmy0cw1kqs3e2yx8_result_.ia.mp4" type="video/mp4">
+        <video id="intro-video" autoplay playsinline muted>
+            <source src="https://archive.org/download/k2t97yzrh9rmy0cw1kqs3e2yx8_result__202601/k2t97yzrh9rmy0cw1kqs3e2yx8_result_.ia.mp4" type="video/mp4">
         </video>
     </div>
 
@@ -30,7 +30,7 @@
         <nav class="navbar">
             <div class="nav-top">
                 <span class="logo-s">NEBULA+</span>
-                <input type="text" id="search-input" placeholder="Buscar película o serie..." onkeyup="actualizarVista()" tabindex="4">
+                <input type="text" id="search-input" placeholder="Buscar..." onkeyup="actualizarVista()" tabindex="4">
                 <button class="btn-exit" onclick="cerrarSesion()" tabindex="5">SALIR</button>
             </div>
             
@@ -40,7 +40,7 @@
                 <button onclick="seleccionarMarca('hbo')" tabindex="8">HBO MAX</button>
                 <button onclick="seleccionarMarca('paramount')" tabindex="9">PARAMOUNT+</button>
                 <button onclick="seleccionarMarca('apple tv')" tabindex="10">APPLE TV</button>
-                <button onclick="seleccionarMarca('natgeo')" tabindex="11">NATIONAL GEOGRAPHIC</button>
+                <button onclick="seleccionarMarca('natgeo')" tabindex="11">NAT GEO</button>
                 <button onclick="seleccionarMarca('espn')" tabindex="12">ESPN</button>
             </div>
 
@@ -55,22 +55,17 @@
 
     <div id="video-player" class="player-overlay hidden">
         <div class="video-container-st" id="v-container"></div>
-        
-        <div id="st-ui-wrapper" class="st-interface">
+        <div id="st-ui" class="st-interface">
             <div class="st-top">
-                <div class="st-info">
-                    <h2 id="player-title">Título</h2>
-                    <span class="st-badge">NEBULA+ VOD</span>
-                </div>
-                <button class="btn-st-exit" id="btn-close" onclick="cerrarReproductor()" tabindex="30">✕ SALIR</button>
+                <h2 id="player-title">Cargando...</h2>
+                <button class="btn-st-close" id="btn-close" onclick="cerrarReproductor()" tabindex="30">✕ SALIR</button>
             </div>
-
             <div id="serie-controls" class="st-bottom hidden">
-                <div class="st-season-box">
+                <div class="st-season">
                     <span>TEMPORADA:</span>
                     <select id="season-selector" onchange="cargarTemporadaTV(this.value)" tabindex="35"></select>
                 </div>
-                <div id="chapters-list" class="chapters-row-st"></div>
+                <div id="chapters-list" class="chapters-row"></div>
             </div>
         </div>
     </div>
