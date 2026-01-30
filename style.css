@@ -1,46 +1,34 @@
-:root { --bg: #040714; --card: #1a1d29; --blue: #0063e5; --input: #31343e; }
-
-body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; overflow: hidden; width: 100vw; height: 100vh; }
+:root { --bg: #050a12; --blue: #0063e5; --card: #1a1d29; }
+body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; width: 100vw; height: 100vh; }
 .hidden { display: none !important; }
 
-/* INTRO TOTALMENTE ADAPTADA */
-.intro-overlay { 
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
-    background: #000; z-index: 99999; display: flex; transition: opacity 1s ease; 
-}
+/* INTRO ADAPTADA */
+.intro-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 99999; display: flex; transition: opacity 1s ease; }
 .intro-overlay video { width: 100%; height: 100%; object-fit: cover; }
 
-/* FOCO PARA CONTROL REMOTO */
-:focus { outline: none; border: 4px solid white !important; transform: scale(1.05); z-index: 10; background: #404450 !important; }
+/* ENFOQUE PARA MANDO TV */
+:focus { outline: none; border: 3px solid white !important; transform: scale(1.05); background: #2a2f3e !important; box-shadow: 0 0 15px rgba(255,255,255,0.3); }
 
-.login-container { width: 400px; margin: 10% auto; text-align: center; }
-.logo-title { font-size: 3.5rem; margin-bottom: 20px; }
+.login-container { width: 380px; margin: 8% auto; text-align: center; }
+.logo-title { font-size: 3rem; font-weight: bold; }
 .logo-title span { color: var(--blue); }
 
-/* BUSCADOR Y NAVBAR */
-.navbar { padding: 20px 50px; background: rgba(0,0,0,0.9); border-bottom: 1px solid #31343e; }
-.nav-top { display: flex; justify-content: space-between; align-items: center; }
-#search-input { width: 40%; background: var(--card); color: white; border-radius: 8px; border: 1px solid #31343e; padding: 12px; font-size: 1rem; }
-.btn-exit { width: auto !important; background: #e50914 !important; color: white; padding: 10px 20px !important; margin: 0 !important; cursor: pointer; }
+.navbar { padding: 15px 40px; background: #050a12; border-bottom: 1px solid #1e2736; }
+.nav-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+#search-input { width: 50%; background: #1a1d29; border: 1px solid #31343e; color: white; padding: 10px; border-radius: 5px; }
 
-.nav-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; }
-.brand-bar { display: flex; gap: 10px; }
-.brand-bar button, .tabs button { width: auto; background: var(--card); color: white; padding: 10px 20px; border-radius: 5px; font-size: 0.9rem; }
-.tabs .active { background: var(--blue); font-weight: bold; }
+.brand-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.brand-bar button { background: #1a1d29; color: white; border: 1px solid #31343e; padding: 8px 12px; border-radius: 4px; font-size: 0.75rem; min-width: 90px; }
 
-/* GRILLA DE PELÍCULAS */
-.movie-grid { 
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
-    gap: 25px; padding: 30px 50px; height: 65vh; overflow-y: auto; 
-}
-.poster { 
-    width: 100%; aspect-ratio: 2/3; border-radius: 12px; 
-    background-size: cover; background-position: center; border: 3px solid transparent; transition: 0.3s; 
-}
+.category-tabs { display: flex; align-items: center; gap: 10px; border-top: 1px solid #1e2736; padding-top: 10px; }
+.category-tabs button { background: white; color: black; border: none; padding: 5px 15px; font-weight: bold; }
+.category-tabs .active { background: var(--blue); color: white; }
+.label-view { margin-left: auto; font-weight: bold; font-size: 1.1rem; color: #aaa; text-transform: uppercase; }
 
-/* REPRODUCTOR */
+.movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; padding: 20px 40px; height: 55vh; overflow-y: auto; }
+.poster { width: 100%; aspect-ratio: 2/3; border-radius: 8px; background-size: cover; background-position: center; border: 3px solid transparent; }
+
 .player-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 9999; }
-.video-frame { width: 100%; height: 100%; }
-.video-frame video { width: 100%; height: 100%; object-fit: contain; }
-.close-player { position: absolute; top: 30px; right: 30px; width: auto; background: rgba(255,0,0,0.8); color: white; z-index: 10000; padding: 10px 20px; }
-.p-title { position: absolute; bottom: 40px; left: 40px; background: rgba(0,0,0,0.7); padding: 10px 25px; border-radius: 8px; }
+.video-frame, .video-frame video { width: 100%; height: 100%; }
+.close-player { position: absolute; top: 20px; right: 20px; background: red; color: white; padding: 10px 20px; z-index: 10; border: none; font-weight: bold; }
+.p-title { position: absolute; bottom: 30px; left: 30px; background: rgba(0,0,0,0.8); padding: 10px; border-radius: 5px; }
