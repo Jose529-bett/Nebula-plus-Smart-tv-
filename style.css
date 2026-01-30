@@ -6,7 +6,7 @@ body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif;
 .intro-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 99999; display: flex; transition: opacity 0.8s ease; }
 .intro-overlay video { width: 100%; height: 100%; object-fit: cover; }
 
-/* Enfoque del mando */
+/* Enfoque del mando (Crucial para TV) */
 :focus { outline: none; border: 3px solid white !important; transform: scale(1.05); background: #2a2f3e !important; }
 
 .login-container { width: 380px; margin: 7% auto; text-align: center; }
@@ -35,8 +35,31 @@ input { background: #121926; color: white; border: 1px solid #31343e; padding: 1
 .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 20px; padding: 20px 40px; height: 55vh; overflow-y: auto; }
 .poster { width: 100%; aspect-ratio: 2/3; border-radius: 10px; background-size: cover; background-position: center; border: 3px solid transparent; cursor: pointer; transition: 0.3s; }
 
-/* Reproductor */
-.player-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 9999; }
-.video-frame { width: 100%; height: 100%; }
-.close-player { position: absolute; top: 25px; right: 25px; background: #e50914; color: white; padding: 12px 25px; z-index: 100; border: none; font-weight: bold; border-radius: 5px; }
-.p-title { position: absolute; bottom: 40px; left: 40px; background: rgba(0,0,0,0.8); padding: 12px 20px; border-radius: 8px; border-left: 5px solid var(--blue); }
+/* REPRODUCTOR MEJORADO PARA SERIES */
+.player-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 9999; display: flex; flex-direction: column; }
+
+.player-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent); }
+
+.player-wrapper { display: flex; flex: 1; overflow: hidden; }
+
+.video-frame { flex: 1; background: #000; position: relative; }
+.video-frame video { width: 100%; height: 100%; }
+
+/* Barra Lateral de Capítulos */
+.serie-sidebar { width: 320px; background: rgba(10, 15, 25, 0.95); border-left: 2px solid var(--blue); display: flex; flex-direction: column; padding: 20px; box-shadow: -10px 0 20px rgba(0,0,0,0.5); }
+
+.sidebar-title { font-size: 0.9rem; color: var(--blue); text-transform: uppercase; margin-bottom: 10px; letter-spacing: 1px; }
+
+#season-selector { background: #1a1d29; color: white; border: 1px solid #31343e; padding: 12px; border-radius: 5px; font-size: 1rem; margin-bottom: 20px; width: 100%; }
+
+.chapters-grid { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 5px; }
+
+/* Botones de Episodios */
+.btn-cap { background: #1a1d29; color: white; border: 1px solid #31343e; padding: 15px; border-radius: 6px; text-align: left; cursor: pointer; font-size: 0.9rem; transition: 0.2s; }
+
+.close-player { background: #e50914; color: white; padding: 10px 20px; border: none; font-weight: bold; border-radius: 5px; cursor: pointer; }
+.p-title { margin: 0; font-size: 1.5rem; border-left: 5px solid var(--blue); padding-left: 15px; }
+
+/* Scrollbar personalizada para la lista de capítulos */
+.chapters-grid::-webkit-scrollbar { width: 6px; }
+.chapters-grid::-webkit-scrollbar-thumb { background: var(--blue); border-radius: 10px; }
