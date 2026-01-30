@@ -1,59 +1,32 @@
-:root { --main: #006aff; --bg: #05070a; --card: #1c1f2e; --red: #e50914; }
-
-body { background: var(--bg); color: #fff; font-family: sans-serif; margin: 0; overflow: hidden; }
+:root { --main: #006aff; --bg: #05070a; --card: #1c1f2e; }
+body { background: var(--bg); color: white; font-family: sans-serif; margin: 0; overflow: hidden; }
 .hidden { display: none !important; }
 
-/* Foco para Smart TV */
-:focus { outline: 4px solid #fff !important; transform: scale(1.05); transition: 0.2s; background: var(--main) !important; }
-
-/* Intro */
+/* Intro y Login */
 .intro-bg { position: fixed; inset: 0; background: #000; display: flex; justify-content: center; align-items: center; z-index: 9999; }
-.logo-title { font-size: 4rem; letter-spacing: 5px; }
-.logo-title span, .logo-main span { color: var(--main); }
+.logo-title { font-size: 4rem; color: white; }
+.logo-title span { color: var(--main); }
 
-/* Login */
-.login-wrapper { text-align: center; margin-top: 15vh; }
-.login-box { width: 320px; margin: auto; display: flex; flex-direction: column; gap: 15px; }
-input { padding: 15px; border-radius: 8px; border: none; background: #2a2c38; color: #fff; font-size: 1rem; }
-.btn-entrar { padding: 15px; background: var(--main); border: none; color: #fff; font-weight: bold; border-radius: 8px; cursor: pointer; }
+/* Navegación y Grid */
+.tv-header { padding: 20px 50px; }
+.brands-nav { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
+.movie-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; padding: 0 50px; height: 60vh; overflow-y: auto; }
+.poster-card { aspect-ratio: 2/3; background-size: cover; border-radius: 8px; cursor: pointer; }
 
-/* Catálogo */
-.tv-header { padding: 30px 50px; background: linear-gradient(to bottom, #000, transparent); }
-.header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-.search-bar input { width: 400px; border-radius: 30px; }
-.brands-nav, .type-nav { display: flex; gap: 15px; margin-bottom: 20px; }
-.b-btn, .t-btn { padding: 12px 25px; border: none; border-radius: 5px; background: var(--card); color: #fff; font-weight: bold; }
-
-.movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; padding: 0 50px; height: 60vh; overflow-y: auto; }
-.poster-card { width: 100%; aspect-ratio: 2/3; border-radius: 10px; background-size: cover; background-position: center; cursor: pointer; }
-
-/* Reproductor Nebula+ */
-.player-overlay { position: fixed; inset: 0; background: #000; z-index: 5000; }
-.player-ui { position: absolute; inset: 0; padding: 40px; background: rgba(0,0,0,0.4); display: flex; flex-direction: column; justify-content: space-between; }
-.close-player { align-self: flex-end; padding: 10px 20px; background: var(--red); color: #fff; border: none; border-radius: 5px; font-weight: bold; }
-
-.loader-container { align-self: center; position: relative; width: 120px; height: 120px; }
-svg { transform: rotate(-90deg); }
-.ring-bg { fill: none; stroke: rgba(255,255,255,0.1); stroke-width: 8; }
-.ring-active { fill: none; stroke: var(--main); stroke-width: 8; stroke-dasharray: 283; stroke-dashoffset: 283; }
-.loading-on .ring-active { animation: load 2s infinite linear; }
-@keyframes load { 0% { stroke-dashoffset: 283; } 50% { stroke-dashoffset: 140; } 100% { stroke-dashoffset: 283; transform: rotate(360deg); } }
-#play-pause { position: absolute; inset: 20px; border-radius: 50%; border: none; font-size: 2rem; }
-
-.player-footer { background: linear-gradient(to top, #000, transparent); padding: 20px; }
-.tv-progress-bar { width: 100%; height: 6px; background: rgba(255,255,255,0.3); border-radius: 3px; }
-.v-bar-fill { height: 100%; width: 0%; background: var(--main); }
-.episodes-row { display: flex; gap: 10px; overflow-x: auto; padding: 15px 0; }
-.ep-btn { padding: 10px 20px; background: #333; color: #fff; border: none; border-radius: 5px; }
-
-/* Animación Intro */
-.pulse { animation: pulse 2s infinite; }
-@keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
-/* Esto hará que el poster brille y se agrande cuando navegues con el mando */
-.poster-card:focus, .b-btn:focus, .t-btn:focus, #tv-search:focus, .btn-exit:focus {
-    border: 5px solid #006aff !important;
-    transform: scale(1.1);
+/* REGLAS DE FOCO PARA SMART TV (Mando a distancia) */
+[tabindex]:focus {
     outline: none;
-    box-shadow: 0 0 20px #006aff;
-    z-index: 10;
+    border: 4px solid var(--main) !important;
+    transform: scale(1.05);
+    box-shadow: 0 0 20px var(--main);
+    transition: 0.2s;
 }
+
+.btn-exit { background: #333; color: white; border: none; padding: 10px 20px; border-radius: 5px; }
+.btn-exit:focus { background: red !important; }
+
+/* Reproductor */
+.player-overlay { position: fixed; inset: 0; background: #000; z-index: 5000; }
+.close-player { position: absolute; top: 30px; right: 50px; background: red; color: white; border: none; padding: 10px 25px; font-weight: bold; border-radius: 5px; }
+.episodes-row { display: flex; gap: 10px; padding: 20px; overflow-x: auto; }
+.ep-btn { padding: 10px 20px; background: var(--card); color: white; border: none; border-radius: 5px; }
