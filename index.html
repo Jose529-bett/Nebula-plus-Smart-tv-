@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nebula+ Premium</title>
+    <title>Nebula+ Smart TV</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -11,11 +11,11 @@
 </head>
 <body>
 
-    <div id="sc-intro" class="screen intro-bg">
+    <div id="sc-intro" class="intro-bg">
         <h1 class="logo-title pulse">NEBULA<span>+</span></h1>
     </div>
 
-    <div id="sc-login" class="screen login-bg hidden">
+    <div id="sc-login" class="screen hidden">
         <div class="login-wrapper">
             <h1 class="logo-main">NEBULA<span>+</span></h1>
             <div class="login-box">
@@ -30,10 +30,10 @@
         <header class="tv-header">
             <div class="header-top">
                 <span class="logo-s">NEBULA<span>+</span></span>
-                <div class="search-bar">
-                    <input type="text" id="tv-search" placeholder="🔍 Buscar películas o series..." tabindex="4">
+                <div class="search-container">
+                    <input type="text" id="tv-search" placeholder="🔍 Buscar..." tabindex="4">
                 </div>
-                <button class="btn-exit" onclick="location.reload()" tabindex="5">SALIR</button>
+                <button class="btn-exit" onclick="salirApp()" tabindex="5">SALIR</button>
             </div>
             
             <div class="brands-nav">
@@ -42,11 +42,13 @@
                 <button class="b-btn" onclick="navMarca('hbo')" tabindex="8">HBO MAX</button>
                 <button class="b-btn" onclick="navMarca('paramount')" tabindex="9">PARAMOUNT</button>
                 <button class="b-btn" onclick="navMarca('apple')" tabindex="10">APPLE TV</button>
+                <button class="b-btn" onclick="navMarca('espn')" tabindex="11">ESPN</button>
+                <button class="b-btn" onclick="navMarca('natgeo')" tabindex="12">NAT GEO</button>
             </div>
 
-            <div id="sub-nav" class="type-nav">
-                <button id="tab-peli" class="t-btn active" onclick="setFiltroTipo('pelicula')" tabindex="11">PELÍCULAS</button>
-                <button id="tab-serie" class="t-btn" onclick="setFiltroTipo('serie')" tabindex="12">SERIES</button>
+            <div class="type-nav">
+                <button id="tab-peli" class="t-btn active" onclick="setFiltroTipo('pelicula')" tabindex="13">PELÍCULAS</button>
+                <button id="tab-serie" class="t-btn" onclick="setFiltroTipo('serie')" tabindex="14">SERIES</button>
             </div>
         </header>
 
@@ -55,25 +57,13 @@
 
     <div id="video-player" class="player-overlay hidden">
         <div id="v-wrapper" class="full-video"></div>
-        
         <div class="player-ui">
-            <button class="close-player" onclick="cerrarReproductor()" tabindex="20">✕ CERRAR</button>
-            
-            <div id="nebula-loader" class="loader-container">
-                <svg viewBox="0 0 100 100">
-                    <circle class="ring-bg" cx="50" cy="50" r="45"></circle>
-                    <circle id="ring-progress" class="ring-active" cx="50" cy="50" r="45"></circle>
-                </svg>
-                <button id="play-pause" onclick="togglePlay()" tabindex="21">⏸</button>
-            </div>
-
+            <button class="close-player" onclick="cerrarReproductor()" tabindex="50">✕ CERRAR</button>
+            <div id="loader" class="nebula-ring"></div>
             <div class="player-footer">
-                <h2 id="v-display-title">Cargando...</h2>
-                <div class="tv-progress-bar"><div id="v-bar" class="v-bar-fill"></div></div>
-                
+                <h2 id="v-title">Cargando...</h2>
                 <div id="series-panel" class="hidden">
-                    <p>EPISODIOS:</p>
-                    <div id="episodes-list" class="episodes-row"></div>
+                    <div id="ep-list" class="episodes-row"></div>
                 </div>
             </div>
         </div>
