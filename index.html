@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nebula+ | Smart TV</title>
+    <title>Nebula+ | Smart TV Experience</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -30,28 +30,30 @@
         <nav class="navbar">
             <div class="nav-top">
                 <span class="logo-s">NEBULA+</span>
-                <div class="brand-bar">
-                    <button onclick="seleccionarMarca('disney')" tabindex="4">DISNEY</button>
-                    <button onclick="seleccionarMarca('netflix')" tabindex="5">NETFLIX</button>
-                    <button onclick="seleccionarMarca('hbo')" tabindex="6">HBO MAX</button>
-                    <button onclick="seleccionarMarca('paramount')" tabindex="7">PARAMOUNT</button>
-                </div>
-                <button class="btn-exit" onclick="cerrarSesion()" tabindex="11">CERRAR SESIÓN</button>
+                <input type="text" id="search-input" placeholder="🔍 Buscar en el catálogo..." onkeyup="actualizarVista()" tabindex="4">
+                <button class="btn-exit" onclick="cerrarSesion()" tabindex="5">CERRAR SESIÓN</button>
             </div>
-            <div class="tabs">
-                <button id="t-peli" class="active" onclick="cambiarTipo('pelicula')" tabindex="8">PELÍCULAS</button>
-                <button id="t-serie" onclick="cambiarTipo('serie')" tabindex="9">SERIES</button>
+            <div class="nav-bottom">
+                <div class="brand-bar">
+                    <button onclick="seleccionarMarca('disney')" tabindex="6">DISNEY</button>
+                    <button onclick="seleccionarMarca('netflix')" tabindex="7">NETFLIX</button>
+                    <button onclick="seleccionarMarca('hbo')" tabindex="8">HBO MAX</button>
+                    <button onclick="seleccionarMarca('paramount')" tabindex="9">PARAMOUNT</button>
+                </div>
+                <div class="tabs">
+                    <button id="t-peli" class="active" onclick="cambiarTipo('pelicula')" tabindex="10">PELÍCULAS</button>
+                    <button id="t-serie" onclick="cambiarTipo('serie')" tabindex="11">SERIES</button>
+                </div>
             </div>
         </nav>
         <div class="main-content">
-            <h2 id="cat-title">CATÁLOGO</h2>
             <div id="grid" class="movie-grid"></div>
         </div>
     </div>
 
     <div id="video-player" class="player-overlay hidden">
         <button class="close-player" id="btn-close" onclick="cerrarReproductor()">✕ VOLVER</button>
-        <div class="video-frame"></div>
+        <div class="video-frame" id="v-container"></div>
         <h2 id="player-title" class="p-title">Reproduciendo...</h2>
     </div>
 
