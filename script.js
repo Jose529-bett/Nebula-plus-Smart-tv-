@@ -1,105 +1,46 @@
-// 1. Configuración de tu Firebase
-const firebaseConfig = { databaseURL: "https://nebula-plus-app-default-rtdb.firebaseio.com/" };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+:root { --bg: #040714; --card: #1a1d29; --blue: #0063e5; --input: #31343e; }
 
-let movies = [];
-let currentBrand = 'disney';
-let currentType = 'pelicula';
-let hlsInstance = null;
+body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; }
+.hidden { display: none !important; }
 
-// 2. Escuchar cambios de la App Android
-db.ref('movies').on('value', snap => {
-    const data = snap.val();
-    movies = [];
-    if(data) { 
-        for(let id in data) { 
-            movies.push({ ...data[id], firebaseId: id }); 
-        } 
-    }
-    actualizarVista();
-});
-
-// 3. Funciones de Navegación
-function entrar() {
-    document.getElementById('sc-login').classList.add('hidden');
-    document.getElementById('sc-main').classList.remove('hidden');
-    // Poner el foco en el primer botón de marca
-    setTimeout(() => document.querySelector('.brand-bar button').focus(), 500);
+/* ESTILO DE LA INTRO */
+.intro-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: #000;
+    z-index: 99999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 1s ease;
 }
 
-function actualizarVista() {
-    const grid = document.getElementById('grid');
-    if(!grid) return;
-    
-    const filtrados = movies.filter(m => m.brand === currentBrand && m.type === currentType);
-    
-    grid.innerHTML = filtrados.map(m => `
-        <div class="poster" 
-             tabindex="10" 
-             style="background-image:url('${m.poster}')" 
-             onclick="reproducir('${m.video}', '${m.title}')">
-        </div>`).join('');
+.intro-overlay video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Asegura que llene toda la pantalla de la TV */
 }
 
-function seleccionarMarca(marca) {
-    currentBrand = marca;
-    actualizarVista();
-}
+/* EFECTO FOCUS PARA TV */
+:focus { outline: none; border: 4px solid white !important; transform: scale(1.08); z-index: 10; }
 
-function cambiarTipo(tipo) {
-    currentType = tipo;
-    document.getElementById('t-peli').classList.toggle('active', tipo === 'pelicula');
-    document.getElementById('t-serie').classList.toggle('active', tipo === 'serie');
-    actualizarVista();
-}
+.login-container { width: 350px; margin: 10% auto; text-align: center; }
+.logo-title { font-size: 3rem; }
+.logo-title span { color: var(--blue); }
 
-// 4. Reproductor
-function reproducir(url, titulo) {
-    const player = document.getElementById('video-player');
-    const container = document.querySelector('.video-frame');
-    document.getElementById('player-title').innerText = titulo;
-    player.classList.remove('hidden');
+input, button { width: 100%; padding: 15px; margin: 10px 0; border-radius: 8px; border: none; font-size: 1.1rem; }
+input { background: var(--input); color: white; }
+.btn-blue { background: var(--blue); color: white; cursor: pointer; font-weight: bold; }
 
-    if(hlsInstance) hlsInstance.destroy();
-    container.innerHTML = `<video id="v-main" controls autoplay style="width:100%; height:100%;"></video>`;
-    
-    const video = document.getElementById('v-main');
-    const urlLimpia = url.trim();
+.navbar { padding: 20px 50px; background: rgba(0,0,0,0.8); }
+.brand-bar { display: flex; gap: 15px; margin-top: 10px; }
+.brand-bar button { width: auto; background: var(--card); color: white; font-size: 0.8rem; }
 
-    if (urlLimpia.includes('.m3u8') && Hls.isSupported()) {
-        hlsInstance = new Hls();
-        hlsInstance.loadSource(urlLimpia);
-        hlsInstance.attachMedia(video);
-    } else {
-        video.src = urlLimpia;
-    }
-    
-    document.getElementById('btn-close').focus();
-}
+.movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 25px; padding: 30px 50px; height: 65vh; overflow-y: auto; }
+.poster { width: 100%; aspect-ratio: 2/3; border-radius: 12px; background-size: cover; cursor: pointer; border: 3px solid transparent; transition: 0.3s; }
 
-function cerrarReproductor() {
-    if(hlsInstance) hlsInstance.destroy();
-    document.getElementById('video-player').classList.add('hidden');
-    document.querySelector('.video-frame').innerHTML = '';
-}
-
-// 5. CONTROL REMOTO (Manejo de teclas flechas)
-document.addEventListener('keydown', (e) => {
-    const focusable = Array.from(document.querySelectorAll('button, input, .poster')).filter(el => el.offsetParent !== null);
-    let index = focusable.indexOf(document.activeElement);
-
-    if (e.keyCode === 37) { // Izquierda
-        index = Math.max(0, index - 1);
-    } else if (e.keyCode === 39) { // Derecha
-        index = Math.min(focusable.length - 1, index + 1);
-    } else if (e.keyCode === 38) { // Arriba
-        index = Math.max(0, index - 4);
-    } else if (e.keyCode === 40) { // Abajo
-        index = Math.min(focusable.length - 1, index + 4);
-    } else if (e.keyCode === 13) { // Enter
-        document.activeElement.click();
-    }
-
-    if (focusable[index]) focusable[index].focus();
-});
+.player-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; }
+.video-frame { width: 100%; height: 100%; }
+.close-player { position: absolute; top: 20px; right: 20px; width: auto; background: rgba(255,0,0,0.8); color: white; z-index: 10000; }
+.p-title { position: absolute; bottom: 30px; left: 30px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 5px; }
