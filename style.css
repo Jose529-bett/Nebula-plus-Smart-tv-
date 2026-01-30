@@ -1,41 +1,32 @@
 :root { --bg: #040714; --card: #1a1d29; --blue: #0063e5; --input: #31343e; }
-
 body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; }
 .hidden { display: none !important; }
 
-/* ESTILO DE LA INTRO */
-.intro-overlay {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: #000;
-    z-index: 99999;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: opacity 1s ease;
-}
+/* INTRO */
+.intro-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 99999; display: flex; justify-content: center; align-items: center; transition: opacity 1s ease; }
 .intro-overlay video { width: 100%; height: 100%; object-fit: cover; }
 
-/* EFECTO FOCO SMART TV */
-:focus { outline: none; border: 4px solid white !important; transform: scale(1.08); z-index: 10; }
+/* FOCUS PARA MANDO TV */
+:focus { outline: none; border: 4px solid white !important; transform: scale(1.05); z-index: 10; box-shadow: 0 0 15px white; }
 
-.login-container { width: 350px; margin: 12% auto; text-align: center; }
-.logo-title { font-size: 3.5rem; }
+.login-container { width: 350px; margin: 10% auto; text-align: center; }
+.logo-title { font-size: 3rem; }
 .logo-title span { color: var(--blue); }
-
 input, button { width: 100%; padding: 15px; margin: 10px 0; border-radius: 8px; border: none; font-size: 1.1rem; }
 input { background: var(--input); color: white; }
 .btn-blue { background: var(--blue); color: white; cursor: pointer; font-weight: bold; }
 
-.navbar { padding: 20px 50px; background: rgba(0,0,0,0.8); }
-.brand-bar { display: flex; gap: 15px; margin-top: 10px; }
-.brand-bar button { width: auto; background: var(--card); color: white; font-size: 0.85rem; }
+.navbar { padding: 20px 50px; background: rgba(0,0,0,0.9); }
+.nav-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+.brand-bar { display: flex; gap: 10px; }
+.brand-bar button { width: auto; background: var(--card); color: white; font-size: 0.8rem; padding: 10px 15px; }
 
-.movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 25px; padding: 30px 50px; height: 60vh; overflow-y: auto; }
-.poster { width: 100%; aspect-ratio: 2/3; border-radius: 12px; background-size: cover; cursor: pointer; border: 3px solid transparent; transition: 0.3s; }
+.btn-exit { width: auto !important; background: #e50914 !important; color: white; font-size: 0.8rem !important; padding: 10px !important; }
+
+.movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; padding: 20px 50px; height: 60vh; overflow-y: auto; }
+.poster { width: 100%; aspect-ratio: 2/3; border-radius: 10px; background-size: cover; background-position: center; cursor: pointer; border: 3px solid transparent; }
 
 .player-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; }
 .video-frame { width: 100%; height: 100%; }
-.close-player { position: absolute; top: 20px; right: 20px; width: auto; background: rgba(255,0,0,0.8); color: white; z-index: 10000; }
-.p-title { position: absolute; bottom: 30px; left: 30px; background: rgba(0,0,0,0.6); padding: 10px; border-radius: 8px; }
+.close-player { position: absolute; top: 20px; right: 20px; width: auto; background: red; color: white; z-index: 10000; }
+.p-title { position: absolute; bottom: 30px; left: 30px; background: rgba(0,0,0,0.7); padding: 10px; border-radius: 5px; }
