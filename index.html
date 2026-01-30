@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nebula+ | Smart TV Experience</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="sc-login" class="screen">
+        <div class="login-container">
+            <h1 class="logo-title">NEBULA<span>+</span></h1>
+            <input type="text" id="log-u" placeholder="Usuario" tabindex="1">
+            <input type="password" id="log-p" placeholder="Contraseña" tabindex="2">
+            <button class="btn-blue" onclick="entrar()" tabindex="3">ENTRAR</button>
+        </div>
+    </div>
+
+    <div id="sc-main" class="screen hidden">
+        <nav class="navbar">
+            <div class="nav-top">
+                <span class="logo-s">NEBULA+</span>
+                <div class="brand-bar">
+                    <button onclick="seleccionarMarca('disney')" tabindex="4">DISNEY</button>
+                    <button onclick="seleccionarMarca('netflix')" tabindex="5">NETFLIX</button>
+                    <button onclick="seleccionarMarca('hbo')" tabindex="6">HBO MAX</button>
+                    <button onclick="seleccionarMarca('espn')" tabindex="7">ESPN</button>
+                </div>
+            </div>
+            <div class="tabs">
+                <button id="t-peli" class="active" onclick="cambiarTipo('pelicula')" tabindex="8">PELÍCULAS</button>
+                <button id="t-serie" onclick="cambiarTipo('serie')" tabindex="9">SERIES</button>
+            </div>
+        </nav>
+
+        <div class="main-content">
+            <h2 id="cat-title">CATÁLOGO</h2>
+            <div id="grid" class="movie-grid"></div>
+        </div>
+    </div>
+
+    <div id="video-player" class="player-overlay hidden">
+        <button class="close-player" id="btn-close" onclick="cerrarReproductor()">✕ VOLVER</button>
+        <div class="video-frame"></div>
+        <h2 id="player-title" class="p-title">Reproduciendo...</h2>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
