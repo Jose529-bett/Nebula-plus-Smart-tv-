@@ -1,4 +1,4 @@
-// Configuración de tu base de datos
+// --- CONFIGURACIÓN FIREBASE ---
 const fbConf = { databaseURL: "https://nebula-plus-app-default-rtdb.firebaseio.com/" };
 firebase.initializeApp(fbConf);
 const database = firebase.database();
@@ -7,136 +7,112 @@ let allContent = [];
 let brandActive = 'disney';
 let typeActive = 'pelicula';
 let currentVideo = null;
-let hls = null;
 
-// 1. CONTROL DE FLUJO
-window.onload = () => {
-    setTimeout(() => {
-        document.getElementById('sc-intro').classList.add('hidden');
-        document.getElementById('sc-login').classList.remove('hidden');
-        document.getElementById('log-u').focus();
-    }, 3000); // 3 segundos de intro
-};
+// --- MOTOR DE NAVEGACIÓN PARA TV ---
+// Esta función permite que al mover las flechas, el foco salte correctamente
+document.addEventListener('keydown', (e) => {
+    const focusable = Array.from(document.querySelectorAll('[tabindex]:not(.hidden)'));
+    let index = focusable.indexOf(document.activeElement);
 
-function validarLogin() {
-    // Simulación de login exitoso
-    document.getElementById('sc-login').classList.add('hidden');
-    document.getElementById('sc-main').classList.remove('hidden');
-    navMarca('disney');
-}
-
-// 2. BUSCADOR INTELIGENTE
-document.getElementById('tv-search').addEventListener('input', (e) => {
-    const query = e.target.value.toLowerCase();
-    const filtrados = allContent.filter(c => c.title.toLowerCase().includes(query));
-    renderizarGrid(filtrados);
+    if (e.key === "ArrowRight") {
+        let next = index + 1;
+        if (next < focusable.length) focusable[next].focus();
+    }
+    if (e.key === "ArrowLeft") {
+        let prev = index - 1;
+        if (prev >= 0) focusable[prev].focus();
+    }
+    if (e.key === "ArrowDown") {
+        // Salto inteligente hacia abajo (del header al grid)
+        if (index < 5) focusable[6].focus(); 
+        else if (index >= 6 && index <= 10) focusable[11].focus();
+        else focusable[index + 4]?.focus(); // Baja en el grid
+    }
+    if (e.key === "ArrowUp") {
+        if (index > 11) focusable[11].focus();
+        else if (index > 5) focusable[1].focus();
+    }
+    if (e.key === "Enter") {
+        document.activeElement.click();
+    }
 });
 
-// 3. NAVEGACIÓN
-function navMarca(m) {
-    brandActive = m;
-    renderizarGrid();
-}
-
-function setFiltroTipo(t) {
-    typeActive = t;
-    document.getElementById('tab-peli').classList.toggle('active', t==='pelicula');
-    document.getElementById('tab-serie').classList.toggle('active', t==='serie');
-    renderizarGrid();
-}
-
-// 4. REPRODUCTOR INTELIGENTE (Identifica Película o Serie)
-function abrirReproductor(item) {
-    const player = document.getElementById('video-player');
-    const panelSeries = document.getElementById('series-panel');
-    const displayTitle = document.getElementById('v-display-title');
-    
-    player.classList.remove('hidden');
-    displayTitle.innerText = item.title;
-
-    // --- LÓGICA DE IDENTIFICACIÓN ---
-    if (item.type === 'serie' || item.episodios) {
-        console.log("Modo Inteligente: SERIE Detectada.");
-        panelSeries.classList.remove('hidden');
-        generarCapitulos(item.episodios, item.title);
-        
-        // Cargar el primer capítulo automáticamente si existe
-        if(item.episodios) {
-            const primerEp = Object.values(item.episodios)[0].video;
-            prepararVideo(primerEp);
-        }
-    } else {
-        console.log("Modo Inteligente: PELÍCULA Detectada.");
-        panelSeries.classList.add('hidden');
-        prepararVideo(item.video); // Reproducción instantánea
-    }
-}
-
-function generarCapitulos(eps, tituloSerie) {
-    const container = document.getElementById('episodes-list');
-    container.innerHTML = "";
-    Object.keys(eps).forEach((key, i) => {
-        const btn = document.createElement('button');
-        btn.className = "ep-btn";
-        btn.tabIndex = 30 + i;
-        btn.innerText = `Episodio ${i + 1}`;
-        btn.onclick = () => {
-            document.getElementById('v-display-title').innerText = `${tituloSerie} - E${i+1}`;
-            prepararVideo(eps[key].video);
-        };
-        container.appendChild(btn);
+// --- BUSCADOR REAL (Corregido) ---
+function activarBuscador() {
+    const searchInput = document.getElementById('tv-search');
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        const filtrados = allContent.filter(c => 
+            c.title.toLowerCase().includes(query) || 
+            c.brand.toLowerCase().includes(query)
+        );
+        renderizarGrid(filtrados);
     });
 }
 
-function prepararVideo(url) {
-    const wrapper = document.getElementById('v-wrapper');
-    const loader = document.getElementById('nebula-loader');
-    
-    if(hls) hls.destroy();
-    wrapper.innerHTML = `<video id="main-v" style="width:100%; height:100vh;"></video>`;
-    currentVideo = document.getElementById('main-v');
-
-    loader.classList.add('loading-on');
-    currentVideo.onplaying = () => loader.classList.remove('loading-on');
-
-    if(url.includes('.m3u8')) {
-        hls = new Hls(); hls.loadSource(url); hls.attachMedia(currentVideo);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => currentVideo.play());
-    } else {
-        currentVideo.src = url; currentVideo.play();
-    }
-
-    currentVideo.ontimeupdate = () => {
-        const pct = (currentVideo.currentTime / currentVideo.duration) * 100;
-        document.getElementById('v-bar').style.width = pct + "%";
-    };
+// --- BOTÓN SALIR / CERRAR SESIÓN ---
+function salirApp() {
+    // Te devuelve al login y limpia la pantalla
+    document.getElementById('sc-main').classList.add('hidden');
+    document.getElementById('sc-login').classList.remove('hidden');
+    document.getElementById('log-u').focus();
 }
 
-function togglePlay() {
-    if(currentVideo.paused) { currentVideo.play(); } else { currentVideo.pause(); }
+// --- REPRODUCTOR INTELIGENTE (Mejorado) ---
+function abrirReproductor(item) {
+    const player = document.getElementById('video-player');
+    player.classList.remove('hidden');
+    
+    // Si es serie, genera botones de EPISODIOS
+    const panelSeries = document.getElementById('series-panel');
+    if (item.type === 'serie' || item.episodios) {
+        panelSeries.classList.remove('hidden');
+        const container = document.getElementById('episodes-list');
+        container.innerHTML = "";
+        
+        // Convertir episodios en botones para el mando
+        Object.keys(item.episodios).forEach((key, i) => {
+            const btn = document.createElement('button');
+            btn.className = "ep-btn";
+            btn.tabIndex = 100 + i; // Tabindex alto para no chocar
+            btn.innerText = `EP. ${i+1}`;
+            btn.onclick = () => cargarVideo(item.episodios[key].video);
+            container.appendChild(btn);
+        });
+        // Auto-reproducir el primero
+        cargarVideo(Object.values(item.episodios)[0].video);
+    } else {
+        panelSeries.classList.add('hidden');
+        cargarVideo(item.video);
+    }
+    
+    // Poner el foco en el botón de cerrar por seguridad
+    setTimeout(() => document.querySelector('.close-player').focus(), 500);
 }
 
 function cerrarReproductor() {
-    if(currentVideo) currentVideo.pause();
+    const video = document.getElementById('main-v');
+    if(video) video.pause();
     document.getElementById('video-player').classList.add('hidden');
+    // Al cerrar, devuelve el foco al catálogo
+    document.querySelector('.poster-card').focus();
 }
 
-// 5. CARGA DESDE FIREBASE
-database.ref('movies').on('value', res => {
-    const data = res.val();
-    allContent = [];
-    for(let id in data) allContent.push({...data[id], id});
-    renderizarGrid();
-});
-
+// --- RENDERIZADO ---
 function renderizarGrid(dataCustom = null) {
     const grid = document.getElementById('grid');
     const lista = dataCustom ? dataCustom : allContent.filter(c => c.brand === brandActive && c.type === typeActive);
     
-    grid.innerHTML = lista.map(item => `
-        <div class="poster-card" tabindex="0" 
+    grid.innerHTML = lista.map((item, i) => `
+        <div class="poster-card" tabindex="${20 + i}" 
              style="background-image:url('${item.poster}')"
-             onclick='abrirReproductor(${JSON.stringify(item).replace(/'/g, "&apos;")})'>
+             onclick='abrirReproductor(${JSON.stringify(item)})'>
         </div>
     `).join('');
 }
+
+// Iniciar buscador al cargar
+window.onload = () => {
+    activarBuscador();
+    // ... resto de lógica de intro ...
+};
