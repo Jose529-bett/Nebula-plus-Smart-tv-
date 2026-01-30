@@ -2,7 +2,7 @@
 body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; }
 .hidden { display: none !important; }
 
-/* FOCO CLÁSICO QUE NO DEFORMA */
+/* FOCO CLÁSICO LIMPIO */
 :focus { 
     outline: none !important; 
     border: 2px solid white !important; 
@@ -11,33 +11,32 @@ body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif;
     transition: 0.2s;
 }
 
-/* Estilos de Estructura */
-.screen { width: 100vw; height: 100vh; }
+.intro-overlay { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; }
+.intro-overlay video { width: 100%; height: 100%; object-fit: cover; }
+
+.screen { width: 100vw; height: 100vh; background: var(--bg); }
 .login-container { width: 350px; margin: 10% auto; text-align: center; }
-.logo-title { font-size: 3.5rem; font-weight: bold; margin-bottom: 25px; }
+.logo-title { font-size: 3.5rem; margin-bottom: 20px; }
 .logo-title span { color: var(--blue); }
 
 input { background: #121926; color: white; border: 1px solid #31343e; padding: 15px; width: 100%; border-radius: 8px; margin-bottom: 10px; box-sizing: border-box; }
 .btn-blue { background: var(--blue); color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
 
-/* Navbar y Marcas */
 .navbar { padding: 20px 40px; background: #050a12; border-bottom: 1px solid #1e2736; }
 .nav-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-.brand-bar { display: flex; gap: 10px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 10px; }
-.brand-bar button { background: var(--card); color: white; border: 1px solid transparent; padding: 10px 18px; border-radius: 5px; white-space: nowrap; }
+.brand-bar { display: flex; gap: 10px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; }
+.brand-bar button { background: var(--card); color: white; border: 1px solid #31343e; padding: 10px 15px; border-radius: 5px; white-space: nowrap; }
 
-/* Grid de Posters */
 .movie-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; padding: 20px 40px; height: 55vh; overflow-y: auto; }
 .poster { width: 100%; aspect-ratio: 2/3; border-radius: 8px; background-size: cover; border: 2px solid transparent; }
 
 /* REPRODUCTOR SUPER TV */
-.player-overlay { position: fixed; inset: 0; background: #000; z-index: 10000; }
+.player-overlay { position: fixed; inset: 0; background: #000; z-index: 9999; }
 .video-container-st { position: absolute; inset: 0; z-index: 1; }
 .video-container-st video { width: 100%; height: 100%; object-fit: contain; }
-
 .st-interface { position: absolute; inset: 0; z-index: 10; display: flex; flex-direction: column; justify-content: space-between; }
-.st-top { padding: 40px; background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent); display: flex; justify-content: space-between; }
-.st-bottom { padding: 40px; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); }
-.chapters-row-st { display: flex; gap: 12px; overflow-x: auto; padding: 15px 0; }
-.btn-cap-st { flex: 0 0 auto; background: rgba(255,255,255,0.1); color: white; border: 1px solid transparent; padding: 15px 30px; border-radius: 6px; }
-.btn-st-exit { background: #e50914; color: white; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; }
+.st-top { padding: 40px; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); display: flex; justify-content: space-between; }
+.st-bottom { padding: 40px; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); }
+.chapters-row { display: flex; gap: 10px; overflow-x: auto; padding: 15px 0; }
+.btn-cap-st { flex: 0 0 auto; background: rgba(255,255,255,0.1); color: white; border: 1px solid transparent; padding: 12px 25px; border-radius: 5px; }
+.btn-st-close { background: #e50914; color: white; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; }
