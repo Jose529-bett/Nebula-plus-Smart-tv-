@@ -1,46 +1,69 @@
-:root { --bg: #040714; --card: #1a1d29; --blue: #0063e5; --input: #31343e; }
+:root { 
+    --bg: #040714; 
+    --card: #1a1d29; 
+    --blue: #0063e5; 
+    --input: #31343e; 
+    --focus: #f9f9f9;
+}
 
-body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; }
+body { 
+    background: var(--bg); 
+    color: white; 
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+    margin: 0; 
+    overflow: hidden; /* Evita scroll innecesario en TV */
+}
+
+/* NAVEGACIÓN SMART TV (FOCO) */
+:focus {
+    outline: none;
+    border: 4px solid var(--focus) !important;
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(255,255,255,0.5);
+    z-index: 100;
+}
+
 .hidden { display: none !important; }
 
-/* ESTILO DE LA INTRO */
-.intro-overlay {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: #000;
-    z-index: 99999;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: opacity 1s ease;
-}
-
-.intro-overlay video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Asegura que llene toda la pantalla de la TV */
-}
-
-/* EFECTO FOCUS PARA TV */
-:focus { outline: none; border: 4px solid white !important; transform: scale(1.08); z-index: 10; }
-
-.login-container { width: 350px; margin: 10% auto; text-align: center; }
-.logo-title { font-size: 3rem; }
+/* LOGIN */
+.login-container { width: 400px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+.logo-title { font-size: 3rem; letter-spacing: 4px; }
 .logo-title span { color: var(--blue); }
 
-input, button { width: 100%; padding: 15px; margin: 10px 0; border-radius: 8px; border: none; font-size: 1.1rem; }
-input { background: var(--input); color: white; }
-.btn-blue { background: var(--blue); color: white; cursor: pointer; font-weight: bold; }
+/* MAIN UI */
+.navbar { padding: 20px 50px; background: linear-gradient(to bottom, #000, transparent); }
+.nav-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.brand-bar { display: flex; gap: 15px; justify-content: center; }
+.brand-bar button { background: var(--card); color: white; border: 1px solid #333; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1rem; }
 
-.navbar { padding: 20px 50px; background: rgba(0,0,0,0.8); }
-.brand-bar { display: flex; gap: 15px; margin-top: 10px; }
-.brand-bar button { width: auto; background: var(--card); color: white; font-size: 0.8rem; }
+.movie-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+    gap: 30px; 
+    padding: 40px 60px;
+    height: 60vh;
+    overflow-y: auto;
+}
 
-.movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 25px; padding: 30px 50px; height: 65vh; overflow-y: auto; }
-.poster { width: 100%; aspect-ratio: 2/3; border-radius: 12px; background-size: cover; cursor: pointer; border: 3px solid transparent; transition: 0.3s; }
+.poster { 
+    width: 100%; 
+    aspect-ratio: 2/3; 
+    background-size: cover; 
+    border-radius: 12px; 
+    cursor: pointer; 
+    transition: 0.3s; 
+    border: 2px solid transparent; 
+}
 
-.player-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; }
-.video-frame { width: 100%; height: 100%; }
-.close-player { position: absolute; top: 20px; right: 20px; width: auto; background: rgba(255,0,0,0.8); color: white; z-index: 10000; }
-.p-title { position: absolute; bottom: 30px; left: 30px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 5px; }
+/* REPRODUCTOR FULLSCREEN */
+.player-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 10000; }
+.player-container { width: 100%; height: 100%; position: relative; }
+.video-frame { width: 100%; height: 80vh; background: #000; }
+.close-player { position: absolute; top: 20px; right: 20px; z-index: 10001; background: rgba(255,0,0,0.7); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+
+/* ADMIN */
+.admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 20px; }
+.admin-card { background: var(--card); padding: 20px; border-radius: 10px; }
+.table-scroll { max-height: 200px; overflow-y: auto; background: #000; margin-top: 10px; }
+table { width: 100%; text-align: left; font-size: 0.9rem; }
+input, select { background: var(--input); color: white; border: none; padding: 12px; margin: 5px 0; border-radius: 5px; width: 100%; box-sizing: border-box; }
