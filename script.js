@@ -4,11 +4,17 @@ const db = firebase.database();
 
 let catalogFull = [], currentBrand = 'disney', currentType = 'pelicula', hlsInstance = null, datosSerieActual = [];
 
-// INTRO
+// INTRO CON TIMER DE SEGURIDAD (6 segundos)
 const vIntro = document.getElementById('intro-video'), lIntro = document.getElementById('intro-layer');
-vIntro.onended = () => { lIntro.style.display = 'none'; document.getElementById('sc-login').classList.remove('hidden'); document.getElementById('log-u').focus(); };
+function saltarIntro() {
+    lIntro.style.display = 'none';
+    document.getElementById('sc-login').classList.remove('hidden');
+    document.getElementById('log-u').focus();
+}
+vIntro.onended = saltarIntro;
+setTimeout(() => { if(lIntro.style.display !== 'none') saltarIntro(); }, 6000);
 
-// LOGIN CON FIREBASE
+// LOGIN REAL
 function entrar() {
     const u = document.getElementById('log-u').value;
     const p = document.getElementById('log-p').value;
@@ -19,13 +25,12 @@ function entrar() {
         if(ok) {
             document.getElementById('sc-login').classList.add('hidden');
             document.getElementById('sc-main').classList.remove('hidden');
-        } else { alert("Usuario o clave incorrectos"); }
+        } else { alert("Acceso denegado"); }
     });
 }
-
 function cerrarSesion() { location.reload(); }
 
-// CARGA Y BUSCADOR
+// CATALOGO Y BUSCADOR
 db.ref('movies').on('value', snap => {
     const data = snap.val(); catalogFull = [];
     for (let id in data) catalogFull.push({ ...data[id], fbId: id });
@@ -39,7 +44,7 @@ function actualizarVista() {
     grid.innerHTML = filtrados.map(m => `<div class="poster" tabindex="20" style="background-image:url('${m.poster}')" onclick="reproducir('${m.video}', '${m.title}', '${m.type}')"></div>`).join('');
 }
 
-// REPRODUCTOR
+// REPRODUCTOR SUPER TV
 function reproducir(url, titulo, tipo) {
     document.getElementById('video-player').classList.remove('hidden');
     document.getElementById('player-title').innerText = titulo;
@@ -49,7 +54,7 @@ function reproducir(url, titulo, tipo) {
         const temps = url.split('|');
         datosSerieActual = temps.map(t => t.split(','));
         const sel = document.getElementById('season-selector');
-        sel.innerHTML = datosSerieActual.map((_, i) => `<option value="${i}">TEMPORADA ${i+1}</option>`).join('');
+        sel.innerHTML = datosSerieActual.map((_, i) => `<option value="${i}">T${i+1}</option>`).join('');
         cargarTemporadaTV(0);
     } else {
         ctrl.classList.add('hidden');
@@ -88,8 +93,8 @@ document.addEventListener('keydown', (e) => {
     else if (e.keyCode === 13) {
         if(document.activeElement.tagName === 'BODY') {
             const v = document.getElementById('v-main');
-            if(v.paused) v.play(); else v.pause();
+            if(v) { if(v.paused) v.play(); else v.pause(); }
         } else { document.activeElement.click(); }
     }
-    if (el[i]) { el[i].focus(); el[i].scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' }); }
+    if (el[i]) el[i].focus();
 });
