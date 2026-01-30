@@ -2,51 +2,83 @@ const firebaseConfig = { databaseURL: "https://nebula-plus-app-default-rtdb.fire
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-let movies = [];
+let catalogFull = [];
 let currentBrand = 'disney';
 let currentType = 'pelicula';
 let hlsInstance = null;
 
-// --- CONTROL DE INTRO ---
-const videoIntro = document.getElementById('intro-video');
-const capaIntro = document.getElementById('intro-layer');
+// LÓGICA DE INTRO
+const vIntro = document.getElementById('intro-video');
+const lIntro = document.getElementById('intro-layer');
+vIntro.onended = () => { finalizarIntro(); };
 
-videoIntro.onended = () => { cerrarIntro(); };
-
-function cerrarIntro() {
-    capaIntro.style.opacity = '0';
+function finalizarIntro() {
+    lIntro.style.opacity = '0';
     setTimeout(() => {
-        capaIntro.classList.add('hidden');
+        lIntro.classList.add('hidden');
         document.getElementById('sc-login').classList.remove('hidden');
         document.getElementById('log-u').focus();
     }, 1000);
 }
 
-// --- LOGICA DE DATOS ---
-db.ref('movies').on('value', snap => {
+// SINCRONIZACIÓN CON ANDROID (FIREBASE)
+db.ref('/').on('value', snap => {
     const data = snap.val();
-    movies = [];
-    if(data) { for(let id in data) { movies.push({ ...data[id], firebaseId: id }); } }
+    catalogFull = [];
+    if (data) {
+        const root = data.movies ? data.movies : data;
+        for (let id in root) {
+            if (typeof root[id] === 'object') {
+                catalogFull.push({ ...root[id], fbId: id });
+            }
+        }
+    }
     actualizarVista();
 });
 
+function actualizarVista() {
+    const grid = document.getElementById('grid');
+    if(!grid) return;
+
+    const filtrados = catalogFull.filter(item => {
+        const b = item.brand || item.marca || "";
+        const t = item.type || item.tipo || "";
+        return b.toLowerCase() === currentBrand.toLowerCase() && 
+               t.toLowerCase() === currentType.toLowerCase();
+    });
+
+    if (filtrados.length === 0) {
+        grid.innerHTML = `<p style="padding:40px;">No hay contenido en esta sección.</p>`;
+    } else {
+        grid.innerHTML = filtrados.map(m => {
+            const img = m.poster || m.imagen || m.posterUrl;
+            const url = m.video || m.url || m.videoUrl;
+            const nom = m.title || m.titulo || m.nombre;
+            return `<div class="poster" tabindex="10" style="background-image:url('${img}')" onclick="reproducir('${url}', '${nom}')"></div>`;
+        }).join('');
+    }
+}
+
+// FUNCIONES DE SESIÓN
 function entrar() {
     document.getElementById('sc-login').classList.add('hidden');
     document.getElementById('sc-main').classList.remove('hidden');
     setTimeout(() => document.querySelector('.brand-bar button').focus(), 500);
 }
 
-function actualizarVista() {
-    const grid = document.getElementById('grid');
-    if(!grid) return;
-    const filtrados = movies.filter(m => m.brand === currentBrand && m.type === currentType);
-    grid.innerHTML = filtrados.map(m => `
-        <div class="poster" tabindex="10" style="background-image:url('${m.poster}')" onclick="reproducir('${m.video}', '${m.title}')"></div>
-    `).join('');
+function cerrarSesion() {
+    document.getElementById('sc-main').classList.add('hidden');
+    document.getElementById('sc-login').classList.remove('hidden');
+    document.getElementById('log-u').focus();
 }
 
 function seleccionarMarca(marca) { currentBrand = marca; actualizarVista(); }
-function cambiarTipo(tipo) { currentType = tipo; actualizarVista(); }
+function cambiarTipo(tipo) { 
+    currentType = tipo; 
+    document.getElementById('t-peli').classList.toggle('active', tipo === 'pelicula');
+    document.getElementById('t-serie').classList.toggle('active', tipo === 'serie');
+    actualizarVista(); 
+}
 
 function reproducir(url, titulo) {
     const player = document.getElementById('video-player');
@@ -68,15 +100,15 @@ function cerrarReproductor() {
     document.querySelector('.video-frame').innerHTML = '';
 }
 
-// --- CONTROL REMOTO ---
+// CONTROL REMOTO
 document.addEventListener('keydown', (e) => {
-    if (!capaIntro.classList.contains('hidden')) { cerrarIntro(); return; }
-    const elementos = Array.from(document.querySelectorAll('button, input, .poster')).filter(el => el.offsetParent !== null);
-    let idx = elementos.indexOf(document.activeElement);
-    if (e.keyCode === 37) idx = Math.max(0, idx - 1);
-    else if (e.keyCode === 39) idx = Math.min(elementos.length - 1, idx + 1);
-    else if (e.keyCode === 38) idx = Math.max(0, idx - 4);
-    else if (e.keyCode === 40) idx = Math.min(elementos.length - 1, idx + 4);
+    if (!lIntro.classList.contains('hidden')) { finalizarIntro(); return; }
+    const el = Array.from(document.querySelectorAll('button, input, .poster')).filter(x => x.offsetParent !== null);
+    let i = el.indexOf(document.activeElement);
+    if (e.keyCode === 37) i = Math.max(0, i - 1);
+    else if (e.keyCode === 39) i = Math.min(el.length - 1, i + 1);
+    else if (e.keyCode === 38) i = Math.max(0, i - 4);
+    else if (e.keyCode === 40) i = Math.min(el.length - 1, i + 4);
     else if (e.keyCode === 13) document.activeElement.click();
-    if (elementos[idx]) elementos[idx].focus();
+    if (el[i]) el[i].focus();
 });
