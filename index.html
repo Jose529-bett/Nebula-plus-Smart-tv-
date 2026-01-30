@@ -11,7 +11,13 @@
 </head>
 <body>
 
-    <div id="sc-login" class="screen">
+    <div id="intro-layer" class="intro-overlay">
+        <video id="intro-video" autoplay muted playsinline>
+            <source src="https://archive.org/download/k2t97yzrh9rmy0cw1kqs3e2yx8_result__202601/k2t97yzrh9rmy0cw1kqs3e2yx8_result_.ia.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <div id="sc-login" class="screen hidden">
         <div class="login-container">
             <h1 class="logo-title">NEBULA<span>+</span></h1>
             <input type="text" id="log-u" placeholder="Usuario" tabindex="1">
@@ -36,7 +42,6 @@
                 <button id="t-serie" onclick="cambiarTipo('serie')" tabindex="9">SERIES</button>
             </div>
         </nav>
-
         <div class="main-content">
             <h2 id="cat-title">CATÁLOGO</h2>
             <div id="grid" class="movie-grid"></div>
