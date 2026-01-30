@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+      <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nebula+ TV Hybrid</title>
+    <title>Nebula+ TV</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -11,69 +11,62 @@
 </head>
 <body>
 
+    <div class="secret-trigger" onclick="abrirAdminRemoto()"></div>
+
     <div id="sc-login" class="screen">
         <div class="login-container">
             <h1 class="logo-title">NEBULA<span>+</span></h1>
-            <input type="text" id="log-u" placeholder="Usuario" tabindex="1">
-            <input type="password" id="log-p" placeholder="Contraseña" tabindex="2">
-            <button class="btn-blue" onclick="entrar()" tabindex="3">ENTRAR</button>
+            <input type="text" id="log-u" placeholder="Usuario" tabindex="0">
+            <input type="password" id="log-p" placeholder="Contraseña" tabindex="0">
+            <button class="btn-blue" onclick="entrar()" tabindex="0">ENTRAR</button>
         </div>
     </div>
 
     <div id="sc-main" class="screen hidden">
-        <nav class="navbar">
-            <div class="nav-top">
-                <span class="logo-s">NEBULA+</span>
-                <input type="text" id="search-box" placeholder="Buscar..." onkeyup="buscar()" tabindex="4">
-                <button class="avatar" onclick="abrirAdmin()" tabindex="5">👤</button>
+        <header class="navbar">
+            <div class="brand-bar" id="brand-container">
+                <button class="brand-btn" onclick="seleccionarMarca('disney')" tabindex="0">DISNEY</button>
+                <button class="brand-btn" onclick="seleccionarMarca('netflix')" tabindex="0">NETFLIX</button>
+                <button class="brand-btn" onclick="seleccionarMarca('hbo')" tabindex="0">HBO MAX</button>
+                <button class="brand-btn" onclick="seleccionarMarca('paramount')" tabindex="0">PARAMOUNT</button>
+                <button class="brand-btn" onclick="seleccionarMarca('apple')" tabindex="0">APPLE TV</button>
+                <button class="brand-btn" onclick="seleccionarMarca('espn')" tabindex="0">ESPN</button>
             </div>
             
-            <div class="brand-bar" id="brand-container">
-                <button class="brand-btn" onclick="seleccionarMarca('disney')" tabindex="6">DISNEY</button>
-                <button class="brand-btn" onclick="seleccionarMarca('netflix')" tabindex="7">NETFLIX</button>
-                <button class="brand-btn" onclick="seleccionarMarca('hbo')" tabindex="8">HBO MAX</button>
-                <button class="brand-btn" onclick="seleccionarMarca('paramount')" tabindex="9">PARAMOUNT</button>
-                <button class="brand-btn" onclick="seleccionarMarca('apple')" tabindex="10">APPLE TV</button>
-                <button class="brand-btn" onclick="seleccionarMarca('espn')" tabindex="11">ESPN</button>
-            </div>
-        </nav>
-
-        <div class="main-content">
             <div class="tabs">
-                <button id="t-peli" class="active" onclick="cambiarTipo('pelicula')" tabindex="12">PELÍCULAS</button>
-                <button id="t-serie" onclick="cambiarTipo('serie')" tabindex="13">SERIES</button>
+                <button id="t-peli" class="tab-btn active" onclick="cambiarTipo('pelicula')" tabindex="0">PELÍCULAS</button>
+                <button id="t-serie" class="tab-btn" onclick="cambiarTipo('serie')" tabindex="0">SERIES</button>
             </div>
-            <h2 id="cat-title">CATÁLOGO</h2>
-            <div id="grid" class="movie-grid"></div>
-        </div>
+        </header>
+
+        <div id="grid" class="movie-grid">
+            </div>
     </div>
 
     <div id="video-player" class="player-overlay hidden">
-        <div id="loading-screen" class="loading-overlay">
+        <div id="loading-screen" class="loading-screen">
             <div class="loader-content">
                 <h1 class="logo-title pulse">NEBULA<span>+</span></h1>
                 <p>Cargando contenido...</p>
                 <div class="spinner"></div>
             </div>
         </div>
-        
-        <div class="video-container" id="video-container">
+
+        <div class="video-container">
             <div class="video-frame"></div>
-            <div class="google-controls">
-                <div class="top-info">
-                    <h2 id="player-title">Título</h2>
-                    <button class="google-close" onclick="cerrarReproductor()" tabindex="20">✕ SALIR</button>
+            <div class="player-controls">
+                <div class="top-row">
+                    <h2 id="player-title"></h2>
+                    <button class="exit-btn" onclick="cerrarReproductor()" tabindex="0">✕ SALIR</button>
                 </div>
-                <div class="center-controls">
-                    <button class="control-btn" onclick="skip(-10)" tabindex="21">⏪</button>
-                    <button id="play-pause" class="control-btn play-main" onclick="togglePlay()" tabindex="22">⏸</button>
-                    <button class="control-btn" onclick="skip(10)" tabindex="23">⏩</button>
+                <div class="center-row">
+                    <button class="ctrl" onclick="skip(-10)" tabindex="0">⏪</button>
+                    <button id="play-btn" class="ctrl main-play" onclick="togglePlay()" tabindex="0">⏸</button>
+                    <button class="ctrl" onclick="skip(10)" tabindex="0">⏩</button>
                 </div>
-                <div class="bottom-controls">
-                    <div class="progress-container"><div id="progress-bar" class="progress-bar"></div></div>
-                    <div id="serie-controls" class="hidden">
-                        <select id="season-selector" onchange="cargarTemporada(this.value)" tabindex="24"></select>
-                        <div id="episodes-grid" class="episodes-grid"></div>
+                <div class="bottom-row">
+                    <div class="progress-wrapper">
+                        <div id="progress-bar" class="progress-fill"></div>
                     </div>
                 </div>
             </div>
@@ -83,3 +76,4 @@
     <script src="script.js"></script>
 </body>
 </html>
+              
