@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nebula+ | Smart TV Experience</title>
+    <title>Nebula+ | Smart TV</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -35,8 +35,8 @@
                     <button onclick="seleccionarMarca('netflix')" tabindex="5">NETFLIX</button>
                     <button onclick="seleccionarMarca('hbo')" tabindex="6">HBO MAX</button>
                     <button onclick="seleccionarMarca('paramount')" tabindex="7">PARAMOUNT</button>
-                    <button onclick="seleccionarMarca('apple')" tabindex="10">APPLE TV</button>
                 </div>
+                <button class="btn-exit" onclick="cerrarSesion()" tabindex="11">CERRAR SESIÓN</button>
             </div>
             <div class="tabs">
                 <button id="t-peli" class="active" onclick="cambiarTipo('pelicula')" tabindex="8">PELÍCULAS</button>
@@ -58,4 +58,3 @@
     <script src="script.js"></script>
 </body>
 </html>
-
