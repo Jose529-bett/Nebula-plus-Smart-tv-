@@ -1,47 +1,25 @@
-:root { --bg: #050a12; --blue: #0063e5; --card: #1a1d29; }
+:root { --bg: #040714; --side: #090b13; --blue: #0063e5; --accent: #f9f9f9; }
 body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; }
 .hidden { display: none !important; }
 
-/* FOCO PARA SMART TV */
+/* FOCO PROFESIONAL */
 :focus { 
-    outline: none !important; 
-    border: 3px solid white !important; 
-    transform: scale(1.05);
-    background: var(--blue) !important;
-    transition: 0.2s ease-in-out;
-    z-index: 10;
+    outline: none; border: 4px solid var(--accent) !important; 
+    transform: scale(1.08); box-shadow: 0 0 20px var(--blue);
+    background: rgba(255,255,255,0.1) !important; z-index: 99;
 }
 
-.intro-overlay { position: fixed; inset: 0; background: #000; z-index: 99999; display: flex; }
-.intro-overlay video { width: 100%; height: 100%; object-fit: cover; }
+.screen { width: 100vw; height: 100vh; display: flex; }
+.sidebar { width: 280px; background: var(--side); padding: 30px; border-right: 1px solid #31343e; }
+.content { flex: 1; padding: 40px; overflow-y: auto; }
 
-.screen { width: 100vw; height: 100vh; background: var(--bg); }
-.login-container { width: 350px; margin: 15% auto; text-align: center; }
-.logo-title { font-size: 3.5rem; font-weight: bold; margin-bottom: 25px; }
-.logo-title span { color: var(--blue); }
+.nav-item, .btn-b { width: 100%; padding: 15px; background: none; border: none; color: #888; text-align: left; font-size: 1.1rem; border-radius: 8px; cursor: pointer; }
+.nav-item.active { color: white; border-left: 4px solid var(--blue); }
 
-input { background: #121926; color: white; border: 1px solid #31343e; padding: 15px; width: 100%; border-radius: 8px; margin-bottom: 10px; box-sizing: border-box; }
-.btn-blue { background: var(--blue); color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
+.movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 25px; }
+.poster { width: 100%; aspect-ratio: 2/3; background-size: cover; border-radius: 12px; border: 2px solid transparent; transition: 0.2s; }
 
-.navbar { padding: 20px 40px; background: #050a12; border-bottom: 1px solid #1e2736; }
-.nav-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-#search-box { width: 40%; margin: 0; }
-
-.brand-bar { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; }
-.brand-bar button { background: var(--card); color: white; border: 1px solid #333; padding: 12px 20px; border-radius: 6px; white-space: nowrap; }
-
-.movie-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 25px; padding: 20px 40px; height: 55vh; overflow-y: auto; }
-.poster { width: 100%; aspect-ratio: 2/3; border-radius: 10px; background-size: cover; border: 3px solid transparent; cursor: pointer; }
-
-/* REPRODUCTOR SUPER TV */
-.player-overlay { position: fixed; inset: 0; background: #000; z-index: 10000; }
-.video-container-st { position: absolute; inset: 0; z-index: 1; }
-.video-container-st video { width: 100%; height: 100%; }
-
-.st-interface { position: absolute; inset: 0; z-index: 10; display: flex; flex-direction: column; justify-content: space-between; }
-.st-top { padding: 40px; background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent); display: flex; justify-content: space-between; }
-.st-bottom { padding: 40px; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); }
-
-.chapters-row { display: flex; gap: 15px; overflow-x: auto; padding: 20px 0; }
-.btn-cap-st { flex: 0 0 auto; background: rgba(255,255,255,0.1); color: white; border: 2px solid transparent; padding: 15px 30px; border-radius: 8px; font-weight: bold; }
-.btn-st-close { background: #e50914; color: white; border: none; padding: 10px 25px; border-radius: 5px; font-weight: bold; }
+.player-overlay { position: fixed; inset: 0; background: black; z-index: 9999; display: flex; flex-direction: column; }
+.video-frame { width: 100%; height: 75vh; }
+.episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; padding: 20px; }
+.btn-ep { background: #1a1d29; color: white; border: none; padding: 10px; border-radius: 5px; }
