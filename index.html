@@ -57,9 +57,23 @@
     </div>
 
     <div id="video-player" class="player-overlay hidden">
-        <button class="close-player" id="btn-close" onclick="cerrarReproductor()">✕ VOLVER</button>
-        <div class="video-frame" id="v-container"></div>
-        <h2 id="player-title" class="p-title">Reproduciendo...</h2>
+        <div class="player-header">
+            <h2 id="player-title" class="p-title">Reproduciendo...</h2>
+            <button class="close-player" id="btn-close" onclick="cerrarReproductor()" tabindex="30">✕ VOLVER</button>
+        </div>
+
+        <div class="player-wrapper">
+            <div class="video-frame" id="v-container"></div>
+
+            <div id="serie-controls" class="serie-sidebar hidden">
+                <h3 class="sidebar-title">Temporadas</h3>
+                <select id="season-selector" onchange="cargarTemporadaTV(this.value)" tabindex="35"></select>
+                
+                <h3 class="sidebar-title">Capítulos</h3>
+                <div id="chapters-list" class="chapters-grid">
+                    </div>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>
