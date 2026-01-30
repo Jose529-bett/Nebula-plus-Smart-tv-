@@ -2,33 +2,41 @@
 body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; width: 100vw; height: 100vh; }
 .hidden { display: none !important; }
 
-/* INTRO ADAPTADA */
-.intro-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 99999; display: flex; transition: opacity 1s ease; }
+/* Intro Adaptada */
+.intro-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 99999; display: flex; transition: opacity 0.8s ease; }
 .intro-overlay video { width: 100%; height: 100%; object-fit: cover; }
 
-/* ENFOQUE PARA MANDO TV */
-:focus { outline: none; border: 3px solid white !important; transform: scale(1.05); background: #2a2f3e !important; box-shadow: 0 0 15px rgba(255,255,255,0.3); }
+/* Enfoque del mando */
+:focus { outline: none; border: 3px solid white !important; transform: scale(1.05); background: #2a2f3e !important; }
 
-.login-container { width: 380px; margin: 8% auto; text-align: center; }
-.logo-title { font-size: 3rem; font-weight: bold; }
+.login-container { width: 380px; margin: 7% auto; text-align: center; }
+.logo-title { font-size: 3.5rem; font-weight: bold; margin-bottom: 20px; }
 .logo-title span { color: var(--blue); }
 
+input { background: #121926; color: white; border: 1px solid #31343e; padding: 12px; width: 100%; border-radius: 8px; margin-bottom: 10px; font-size: 1rem; }
+.btn-blue { background: var(--blue); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
+/* Estilo Navbar */
 .navbar { padding: 15px 40px; background: #050a12; border-bottom: 1px solid #1e2736; }
-.nav-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-#search-input { width: 50%; background: #1a1d29; border: 1px solid #31343e; color: white; padding: 10px; border-radius: 5px; }
+.nav-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+#search-input { width: 45%; margin: 0; }
+.btn-exit { background: #e50914; color: white; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
 
-.brand-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
-.brand-bar button { background: #1a1d29; color: white; border: 1px solid #31343e; padding: 8px 12px; border-radius: 4px; font-size: 0.75rem; min-width: 90px; }
+/* Marcas y Categorías */
+.brand-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; }
+.brand-bar button { background: var(--card); color: white; border: 1px solid #31343e; padding: 8px 12px; border-radius: 4px; font-size: 0.8rem; min-width: 105px; transition: 0.2s; }
 
-.category-tabs { display: flex; align-items: center; gap: 10px; border-top: 1px solid #1e2736; padding-top: 10px; }
-.category-tabs button { background: white; color: black; border: none; padding: 5px 15px; font-weight: bold; }
+.category-tabs { display: flex; align-items: center; gap: 10px; border-top: 1px solid #1e2736; padding-top: 15px; }
+.category-tabs button { background: white; color: black; border: none; padding: 6px 20px; font-weight: bold; border-radius: 4px; }
 .category-tabs .active { background: var(--blue); color: white; }
-.label-view { margin-left: auto; font-weight: bold; font-size: 1.1rem; color: #aaa; text-transform: uppercase; }
+.label-view { margin-left: auto; font-weight: bold; color: #888; text-transform: uppercase; font-size: 1.1rem; }
 
-.movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; padding: 20px 40px; height: 55vh; overflow-y: auto; }
-.poster { width: 100%; aspect-ratio: 2/3; border-radius: 8px; background-size: cover; background-position: center; border: 3px solid transparent; }
+/* Catálogo */
+.movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 20px; padding: 20px 40px; height: 55vh; overflow-y: auto; }
+.poster { width: 100%; aspect-ratio: 2/3; border-radius: 10px; background-size: cover; background-position: center; border: 3px solid transparent; cursor: pointer; transition: 0.3s; }
 
+/* Reproductor */
 .player-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 9999; }
-.video-frame, .video-frame video { width: 100%; height: 100%; }
-.close-player { position: absolute; top: 20px; right: 20px; background: red; color: white; padding: 10px 20px; z-index: 10; border: none; font-weight: bold; }
-.p-title { position: absolute; bottom: 30px; left: 30px; background: rgba(0,0,0,0.8); padding: 10px; border-radius: 5px; }
+.video-frame { width: 100%; height: 100%; }
+.close-player { position: absolute; top: 25px; right: 25px; background: #e50914; color: white; padding: 12px 25px; z-index: 100; border: none; font-weight: bold; border-radius: 5px; }
+.p-title { position: absolute; bottom: 40px; left: 40px; background: rgba(0,0,0,0.8); padding: 12px 20px; border-radius: 8px; border-left: 5px solid var(--blue); }
