@@ -49,3 +49,11 @@ svg { transform: rotate(-90deg); }
 /* Animación Intro */
 .pulse { animation: pulse 2s infinite; }
 @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+/* Esto hará que el poster brille y se agrande cuando navegues con el mando */
+.poster-card:focus, .b-btn:focus, .t-btn:focus, #tv-search:focus, .btn-exit:focus {
+    border: 5px solid #006aff !important;
+    transform: scale(1.1);
+    outline: none;
+    box-shadow: 0 0 20px #006aff;
+    z-index: 10;
+}
