@@ -1,135 +1,155 @@
-// CONFIGURACIÓN FIREBASE
 const firebaseConfig = { databaseURL: "https://nebula-plus-app-default-rtdb.firebaseio.com/" };
-firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-let movies = [];
-let currentBrand = 'disney';
-let currentType = 'pelicula';
-let hls = null;
+let users = []; let movies = []; let currentBrand = 'disney'; let currentType = 'pelicula';
+let datosSerieActual = []; let hlsInstance = null;
 
-// 1. GESTIÓN DE CARGA E INTRO
-window.onload = () => {
-    setTimeout(() => {
-        document.getElementById('sc-intro').classList.add('hidden');
-        document.getElementById('sc-login').classList.remove('hidden');
-        document.getElementById('log-u').focus();
-    }, 3000);
-};
-
-// 2. MOTOR DE NAVEGACIÓN (D-PAD SMART TV)
+// --- MOTOR DE NAVEGACIÓN D-PAD (CONTROL REMOTO) ---
 document.addEventListener('keydown', (e) => {
-    const focusable = Array.from(document.querySelectorAll('[tabindex="0"]:not(.hidden)'));
-    let index = focusable.indexOf(document.activeElement);
+    const focusables = document.querySelectorAll('.focusable, .poster');
+    let index = Array.from(focusables).indexOf(document.activeElement);
 
-    const cols = 6; // Número de posters por fila en el CSS
-
-    switch(e.key) {
-        case "ArrowRight": if(index < focusable.length - 1) focusable[index + 1].focus(); break;
-        case "ArrowLeft": if(index > 0) focusable[index - 1].focus(); break;
-        case "ArrowDown": if(index + cols < focusable.length) focusable[index + cols].focus(); break;
-        case "ArrowUp": if(index - cols >= 0) focusable[index - cols].focus(); break;
-        case "Enter": document.activeElement.click(); break;
-        case "Escape": case "Back": cerrarReproductor(); break;
+    switch(e.keyCode) {
+        case 37: // Izquierda
+            if (index > 0) focusables[index - 1].focus();
+            break;
+        case 39: // Derecha
+            if (index < focusables.length - 1) focusables[index + 1].focus();
+            break;
+        case 38: // Arriba
+            moveVertical(-6);
+            break;
+        case 40: // Abajo
+            moveVertical(6);
+            break;
+        case 13: // OK / Enter
+            if(document.activeElement.click) document.activeElement.click();
+            break;
+        case 8: // Back / Volver
+        case 10009:
+            if(!document.getElementById('video-player').classList.contains('hidden')) cerrarReproductor();
+            break;
     }
 });
 
-// 3. BUSCADOR ACTIVO
-document.getElementById('tv-search').addEventListener('input', (e) => {
-    const term = e.target.value.toLowerCase();
-    const filtered = movies.filter(m => m.title.toLowerCase().includes(term));
-    renderGrid(filtered);
+function moveVertical(offset) {
+    const focusables = Array.from(document.querySelectorAll('.focusable, .poster'));
+    let index = focusables.indexOf(document.activeElement);
+    let nextIndex = index + offset;
+    if (nextIndex >= 0 && nextIndex < focusables.length) focusables[nextIndex].focus();
+}
+
+// --- FIREBASE ---
+db.ref('users').on('value', snap => { users = Object.values(snap.val() || {}); });
+db.ref('movies').on('value', snap => {
+    const data = snap.val();
+    movies = [];
+    for(let id in data) movies.push({ ...data[id], firebaseId: id });
+    actualizarVista();
 });
 
-// 4. FUNCIONES DE CATÁLOGO
+// --- SESIÓN Y SALUDO ---
 function entrar() {
-    document.getElementById('sc-login').classList.add('hidden');
-    document.getElementById('sc-main').classList.remove('hidden');
-    renderGrid();
+    const u = document.getElementById('log-u').value;
+    const p = document.getElementById('log-p').value;
+    const user = users.find(x => x.u === u && x.p === p);
+    if(user) {
+        document.getElementById('u-name-greeting').innerHTML = `<h2>¡Hola, ${u}!</h2>`;
+        switchScreen('sc-main');
+        setTimeout(() => document.getElementById('search-box').focus(), 500);
+    } else { alert("Usuario o PIN incorrecto"); }
 }
 
-function cerrarSesion() {
-    location.reload();
+function cerrarSesion() { 
+    document.getElementById('drop-menu').classList.add('hidden');
+    switchScreen('sc-login'); 
 }
 
-function setBrand(b) {
-    currentBrand = b;
-    renderGrid();
+function switchScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
 }
 
-function setType(t) {
-    currentType = t;
-    document.getElementById('btn-peli').classList.toggle('active', t==='pelicula');
-    document.getElementById('btn-serie').classList.toggle('active', t==='serie');
-    renderGrid();
+function toggleMenu() { document.getElementById('drop-menu').classList.toggle('hidden'); }
+
+// --- VISTAS ---
+function seleccionarMarca(b) { currentBrand = b; actualizarVista(); }
+function cambiarTipo(t) { 
+    currentType = t; 
+    document.getElementById('t-peli').classList.toggle('active', t === 'pelicula');
+    document.getElementById('t-serie').classList.toggle('active', t === 'serie');
+    actualizarVista(); 
 }
 
-// 5. REPRODUCTOR INTELIGENTE (Detecta Película o Serie)
-function abrirReproductor(m) {
+function actualizarVista() {
+    const grid = document.getElementById('grid');
+    if(!grid) return;
+    const filtrados = movies.filter(m => m.brand === currentBrand && m.type === currentType);
+    grid.innerHTML = filtrados.map(m => `
+        <div class="poster focusable" tabindex="0" 
+             style="background-image:url('${m.poster}')" 
+             onclick="reproducir('${m.video}', '${m.title}')">
+        </div>`).join('');
+}
+
+// --- REPRODUCTOR ---
+function reproducir(cadena, titulo) {
     const player = document.getElementById('video-player');
-    const panel = document.getElementById('series-panel');
+    document.getElementById('player-title').innerText = titulo;
     player.classList.remove('hidden');
-    document.getElementById('v-titulo').innerText = m.title;
 
-    if (m.type === 'serie' || m.episodios) {
-        panel.classList.remove('hidden');
-        generarEpisodios(m.episodios, m.title);
-        cargarVideo(Object.values(m.episodios)[0].video); // Carga el Ep 1
+    const item = movies.find(m => m.title === titulo);
+    if(item && item.type === 'serie') {
+        document.getElementById('serie-controls').classList.remove('hidden');
+        const temporadas = item.video.split('|');
+        datosSerieActual = temporadas.map(t => t.split(','));
+        document.getElementById('season-selector').innerHTML = datosSerieActual.map((_, i) => `<option value="${i}">Temporada ${i+1}</option>`).join('');
+        cargarTemporada(0);
     } else {
-        panel.classList.add('hidden');
-        cargarVideo(m.video);
+        document.getElementById('serie-controls').classList.add('hidden');
+        gestionarFuente(cadena);
     }
-    setTimeout(() => document.querySelector('.btn-red-close').focus(), 500);
 }
 
-function generarEpisodios(eps, titulo) {
-    const container = document.getElementById('ep-list');
-    container.innerHTML = "";
-    Object.keys(eps).forEach((key, i) => {
-        const btn = document.createElement('button');
-        btn.className = "ep-btn";
-        btn.tabIndex = "0";
-        btn.innerText = `EP ${i+1}`;
-        btn.onclick = () => {
-            document.getElementById('v-titulo').innerText = `${titulo} - EP ${i+1}`;
-            cargarVideo(eps[key].video);
-        };
-        container.appendChild(btn);
-    });
+function gestionarFuente(url) {
+    const container = document.querySelector('.video-frame');
+    if(hlsInstance) hlsInstance.destroy();
+    
+    // Controles nativos habilitados para Play/Pausa con el mando
+    container.innerHTML = `<video id="tv-video" controls autoplay style="width:100%; height:100%;"></video>`;
+    const video = document.getElementById('tv-video');
+    const urlLimpia = url.trim();
+
+    if(urlLimpia.includes('.m3u8')) {
+        if(Hls.isSupported()){
+            hlsInstance = new Hls();
+            hlsInstance.loadSource(urlLimpia);
+            hlsInstance.attachMedia(video);
+        }
+    } else {
+        video.src = urlLimpia;
+    }
+    video.focus();
 }
 
-function cargarVideo(url) {
-    const wrapper = document.getElementById('v-wrapper');
-    if(hls) hls.destroy();
-    wrapper.innerHTML = `<video id="video-node" style="width:100%; height:100vh;" autoplay></video>`;
-    const v = document.getElementById('video-node');
-
-    if(url.includes('.m3u8')) {
-        hls = new Hls(); hls.loadSource(url); hls.attachMedia(v);
-    } else { v.src = url; }
+function cargarTemporada(idx) {
+    const grid = document.getElementById('episodes-grid');
+    grid.innerHTML = datosSerieActual[idx].map((link, i) => `
+        <button class="btn-ep focusable" onclick="gestionarFuente('${link.trim()}')">CAP. ${i+1}</button>
+    `).join('');
 }
 
 function cerrarReproductor() {
-    const v = document.getElementById('video-node');
-    if(v) v.pause();
+    const video = document.getElementById('tv-video');
+    if(video) video.pause();
     document.getElementById('video-player').classList.add('hidden');
 }
 
-// 6. CONEXIÓN REAL FIREBASE
-db.ref('movies').on('value', (snapshot) => {
-    const data = snapshot.val();
-    movies = [];
-    for (let id in data) movies.push({ ...data[id], id });
-    renderGrid();
-});
-
-function renderGrid(dataToRender = null) {
-    const grid = document.getElementById('grid');
-    const list = dataToRender || movies.filter(m => m.brand === currentBrand && m.type === currentType);
-    
-    grid.innerHTML = list.map(m => `
-        <div class="poster" tabindex="0" style="background-image:url('${m.poster}')" 
-             onclick='abrirReproductor(${JSON.stringify(m)})'>
-        </div>
+function buscar() {
+    const q = document.getElementById('search-box').value.toLowerCase();
+    const filtrados = movies.filter(m => m.title.toLowerCase().includes(q));
+    document.getElementById('grid').innerHTML = filtrados.map(m => `
+        <div class="poster focusable" tabindex="0" style="background-image:url('${m.poster}')" onclick="reproducir('${m.video}', '${m.title}')"></div>
     `).join('');
 }
