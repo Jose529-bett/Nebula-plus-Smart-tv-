@@ -1,50 +1,55 @@
 :root { --bg: #050a12; --blue: #0063e5; --card: #1a1d29; }
-body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow-x: hidden; width: 100vw; height: 100vh; }
+body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; }
 .hidden { display: none !important; }
 
-/* Intro */
-.intro-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 99999; display: flex; transition: opacity 0.8s ease; }
+/* --- EL BORDE BLANCO DE SELECCIÓN (FOCUS) --- */
+:focus {
+    outline: 5px solid white !important;
+    outline-offset: 4px;
+    transform: scale(1.05);
+    transition: transform 0.2s ease;
+    z-index: 999;
+}
+
+/* Intro & Login */
+.intro-overlay { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; transition: opacity 0.8s; }
 .intro-overlay video { width: 100%; height: 100%; object-fit: cover; }
-
-/* Enfoque del mando */
-:focus { outline: none; border: 3px solid white !important; transform: scale(1.03); background: var(--blue) !important; color: white !important; }
-
-.login-container { width: 380px; margin: 7% auto; text-align: center; }
-.logo-title { font-size: 3.5rem; font-weight: bold; margin-bottom: 20px; }
+.login-container { width: 350px; margin: 10% auto; text-align: center; }
+.logo-title { font-size: 3rem; font-weight: bold; }
 .logo-title span { color: var(--blue); }
 
-input { background: #121926; color: white; border: 1px solid #31343e; padding: 12px; width: 100%; border-radius: 8px; margin-bottom: 10px; font-size: 1rem; }
-.btn-blue { background: var(--blue); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
+/* Catalog UI */
+.navbar { padding: 20px 40px; background: #050a12; border-bottom: 1px solid #1e2736; }
+.nav-top { display: flex; justify-content: space-between; margin-bottom: 15px; }
+.brand-bar { display: flex; gap: 10px; margin-bottom: 15px; overflow-x: auto; }
+.brand-bar button { background: var(--card); color: white; border: none; padding: 10px 20px; border-radius: 5px; }
+.movie-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; padding: 40px; height: 60vh; overflow-y: auto; }
+.poster { width: 100%; aspect-ratio: 2/3; border-radius: 12px; background-size: cover; background-position: center; cursor: pointer; }
 
-/* Navbar */
-.navbar { padding: 15px 40px; background: #050a12; border-bottom: 1px solid #1e2736; }
-.nav-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-#search-input { width: 45%; margin: 0; }
-.btn-exit { background: #e50914; color: white; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+/* REPRODUCTOR SUPER TV (OVERLAY) */
+.player-overlay { position: fixed; inset: 0; background: #000; z-index: 9000; overflow: hidden; }
+.video-container-full { position: absolute; inset: 0; z-index: 1; }
+.video-container-full video { width: 100%; height: 100%; object-fit: contain; }
 
-.brand-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; }
-.brand-bar button { background: var(--card); color: white; border: 1px solid #31343e; padding: 8px 12px; border-radius: 4px; font-size: 0.8rem; min-width: 105px; transition: 0.2s; }
+.player-header-st { 
+    position: absolute; top: 0; left: 0; width: 100%; padding: 30px 50px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
+    display: flex; justify-content: space-between; z-index: 10;
+}
 
-.category-tabs { display: flex; align-items: center; gap: 10px; border-top: 1px solid #1e2736; padding-top: 15px; }
-.category-tabs button { background: white; color: black; border: none; padding: 6px 20px; font-weight: bold; border-radius: 4px; }
-.category-tabs .active { background: var(--blue); color: white; }
-.label-view { margin-left: auto; font-weight: bold; color: #888; text-transform: uppercase; font-size: 1.1rem; }
+.st-controls { 
+    position: absolute; bottom: 0; left: 0; width: 100%; 
+    background: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.7) 70%, transparent 100%);
+    padding: 40px 50px; z-index: 10;
+}
 
-/* Catálogo */
-.movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 20px; padding: 20px 40px; height: 55vh; overflow-y: auto; }
-.poster { width: 100%; aspect-ratio: 2/3; border-radius: 10px; background-size: cover; background-position: center; border: 3px solid transparent; cursor: pointer; transition: 0.3s; }
+.chapters-horizontal { 
+    display: flex; flex-direction: row; gap: 15px; overflow-x: auto; padding: 15px 5px;
+    scrollbar-width: none;
+}
+.chapters-horizontal::-webkit-scrollbar { display: none; }
 
-/* REPRODUCTOR ESTILO TV */
-.player-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #050a12; z-index: 9999; overflow-y: auto; display: flex; flex-direction: column; }
-.player-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; background: rgba(0,0,0,0.8); }
-.player-wrapper { display: flex; flex-direction: column; width: 100%; }
-.video-frame { width: 100%; aspect-ratio: 16/9; background: #000; }
-.video-frame video { width: 100%; height: 100%; }
-
-.serie-sidebar { padding: 40px; background: linear-gradient(to bottom, #1a1d29, #050a12); }
-.sidebar-title { font-size: 1.8rem; color: var(--blue); font-weight: bold; margin-bottom: 20px; }
-#season-selector { background: #1a1d29; color: white; border: 2px solid #31343e; padding: 15px; border-radius: 8px; font-size: 1.2rem; margin-bottom: 30px; width: 300px; }
-
-.chapters-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 100%; max-width: 1100px; }
-.btn-cap-square { background: #1a1d29; color: white; border: 1px solid #31343e; padding: 25px; border-radius: 10px; font-weight: bold; font-size: 1.5rem; text-align: center; cursor: pointer; }
-.close-player { background: #e50914; color: white; padding: 10px 20px; border: none; font-weight: bold; border-radius: 5px; }
+.btn-cap-square { 
+    flex: 0 0 auto; background: rgba(255,255,255,0.1); color: white; border: none;
+    padding: 15px 35px; border-radius: 8px; font-weight: bold; font-size: 1.2rem;
+}
