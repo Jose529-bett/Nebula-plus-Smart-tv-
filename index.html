@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nebula+ Smart TV</title>
+    <title>Nebula+ | TV Premium</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -11,58 +11,62 @@
 </head>
 <body>
 
-    <div id="sc-intro" class="intro-bg">
-        <h1 class="logo-title pulse">NEBULA<span>+</span></h1>
-    </div>
+    <div class="admin-trigger" onclick="abrirAdmin()"></div>
 
-    <div id="sc-login" class="screen hidden">
-        <div class="login-wrapper">
-            <h1 class="logo-main">NEBULA<span>+</span></h1>
-            <input type="text" id="log-u" placeholder="Usuario" tabindex="0">
-            <input type="password" id="log-p" placeholder="Contraseña" tabindex="0">
-            <button class="btn-entrar" onclick="entrar()" tabindex="0">ENTRAR</button>
+    <div id="sc-login" class="screen">
+        <div class="login-container">
+            <h1 class="logo-title">NEBULA<span>+</span></h1>
+            <input type="text" id="log-u" placeholder="Usuario" class="focusable">
+            <input type="password" id="log-p" placeholder="Contraseña" class="focusable">
+            <button class="btn-blue focusable" onclick="entrar()">ENTRAR</button>
         </div>
     </div>
 
     <div id="sc-main" class="screen hidden">
-        <header class="tv-header">
-            <div class="header-top">
-                <span class="logo-s">NEBULA<span>+</span></span>
-                <input type="text" id="tv-search" placeholder="🔍 Buscar..." tabindex="0">
-                <button class="btn-logout" onclick="cerrarSesion()" tabindex="0">CERRAR SESIÓN</button>
+        <nav class="navbar">
+            <div class="nav-top">
+                <span class="logo-s">NEBULA+</span>
+                <input type="text" id="search-box" placeholder="Buscar..." onkeyup="buscar()" class="focusable">
+                <div class="user-zone">
+                    <button class="avatar focusable" onclick="toggleMenu()">👤</button>
+                    <div id="drop-menu" class="dropdown hidden">
+                        <div id="u-name-greeting"></div> <button class="btn-logout focusable" onclick="cerrarSesion()">Cerrar Sesión</button>
+                    </div>
+                </div>
             </div>
-            
-            <div class="platforms-row">
-                <button class="plat-btn" onclick="setBrand('disney')" tabindex="0">DISNEY</button>
-                <button class="plat-btn" onclick="setBrand('netflix')" tabindex="0">NETFLIX</button>
-                <button class="plat-btn" onclick="setBrand('hbo')" tabindex="0">HBO MAX</button>
-                <button class="plat-btn" onclick="setBrand('paramount')" tabindex="0">PARAMOUNT</button>
-                <button class="plat-btn" onclick="setBrand('apple')" tabindex="0">APPLE TV</button>
-                <button class="plat-btn" onclick="setBrand('espn')" tabindex="0">ESPN</button>
-                <button class="plat-btn" onclick="setBrand('natgeo')" tabindex="0">NAT GEO</button>
+            <div class="brand-bar">
+                <button class="focusable" onclick="seleccionarMarca('disney')">DISNEY</button>
+                <button class="focusable" onclick="seleccionarMarca('netflix')">NETFLIX</button>
+                <button class="focusable" onclick="seleccionarMarca('hbo')">HBO MAX</button>
+                <button class="focusable" onclick="seleccionarMarca('paramount')">PARAMOUNT</button>
+                <button class="focusable" onclick="seleccionarMarca('apple')">APPLE TV</button>
+                <button class="focusable" onclick="seleccionarMarca('espn')">ESPN</button>
+                <button class="focusable" onclick="seleccionarMarca('natgeo')">NAT GEO</button>
             </div>
-
-            <div class="type-selector">
-                <button id="btn-peli" class="type-tab active" onclick="setType('pelicula')" tabindex="0">PELÍCULAS</button>
-                <button id="btn-serie" class="type-tab" onclick="setType('serie')" tabindex="0">SERIES</button>
+        </nav>
+        <div class="main-content">
+            <div class="tabs">
+                <button id="t-peli" class="active focusable" onclick="cambiarTipo('pelicula')">PELÍCULAS</button>
+                <button id="t-serie" class="focusable" onclick="cambiarTipo('serie')">SERIES</button>
             </div>
-        </header>
-
-        <div id="grid" class="movie-grid"></div>
+            <h2 id="cat-title">CATÁLOGO</h2>
+            <div id="grid" class="movie-grid"></div>
+        </div>
     </div>
 
     <div id="video-player" class="player-overlay hidden">
-        <div id="v-wrapper"></div>
-        <div class="tv-controls">
-            <button class="btn-red-close" onclick="cerrarReproductor()" tabindex="0">✕ CERRAR</button>
-            <div class="nebula-play-container">
-                <button id="p-pause" class="nebula-play-btn" onclick="togglePlay()" tabindex="0">⏸</button>
+        <div class="player-container">
+            <div class="player-header">
+                <h2 id="player-title">Título</h2>
+                <button class="close-player focusable" onclick="cerrarReproductor()">✕ CERRAR</button>
             </div>
-            <div class="bot-info">
-                <h2 id="v-titulo">Título</h2>
-                <div id="series-panel" class="hidden">
-                    <div id="ep-list" class="episodes-container"></div>
+            <div class="video-frame"></div>
+            
+            <div id="serie-controls" class="hidden">
+                <div class="serie-meta">
+                    <select id="season-selector" class="focusable" onchange="cargarTemporada(this.value)"></select>
                 </div>
+                <div id="episodes-grid" class="episodes-grid-tv"></div>
             </div>
         </div>
     </div>
