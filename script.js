@@ -6,7 +6,7 @@ let catalogFull = [];
 let currentBrand = 'disney';
 let currentType = 'pelicula';
 let hlsInstance = null;
-let datosSerieActual = []; 
+let datosSerieActual = [];
 
 // --- MANEJO DE INTRO ---
 const vIntro = document.getElementById('intro-video');
@@ -47,7 +47,7 @@ db.ref('movies').on('value', snap => {
     actualizarVista();
 });
 
-// --- VISTA DE CATÁLOGO ---
+// --- MOTOR DE VISTA ---
 function actualizarVista() {
     const grid = document.getElementById('grid');
     const busqueda = document.getElementById('search-input').value.toLowerCase();
@@ -68,50 +68,75 @@ function actualizarVista() {
             </div>`).join('');
 }
 
-// --- REPRODUCTOR INTELIGENTE (Pelis vs Series) ---
+// --- REPRODUCTOR (EL ARREGLO ESTÁ AQUÍ) ---
 function reproducir(cadenaVideo, titulo, tipo) {
     const player = document.getElementById('video-player');
     const serieControls = document.getElementById('serie-controls');
+    const vContainer = document.getElementById('v-container');
+    
     document.getElementById('player-title').innerText = titulo;
     player.classList.remove('hidden');
     
+    // IMPORTANTE: Limpiamos el contenedor antes de empezar
+    vContainer.innerHTML = '';
+
     if(tipo === 'serie') {
+        // 1. Mostramos la barra de capítulos
         serieControls.classList.remove('hidden');
-        // Lógica Android: Separar por | y luego por ,
+        
+        // 2. Procesamos la cadena (Formato Android: Cap1,Cap2 | Cap1T2,Cap2T2)
         const temporadas = cadenaVideo.split('|');
         datosSerieActual = temporadas.map(t => t.split(','));
         
+        // 3. Llenamos el selector de temporadas
         const selector = document.getElementById('season-selector');
         selector.innerHTML = datosSerieActual.map((_, i) => `<option value="${i}">Temporada ${i+1}</option>`).join('');
         
+        // 4. Cargamos el primer capítulo de la primera temporada
         cargarTemporadaTV(0); 
     } else {
+        // Si es película, ocultamos controles de serie y cargamos video directo
         serieControls.classList.add('hidden');
         gestionarFuenteVideoTV(cadenaVideo);
     }
+    
+    // Ponemos el foco en el botón volver para el mando
     document.getElementById('btn-close').focus();
 }
 
 function cargarTemporadaTV(idx) {
     const listado = document.getElementById('chapters-list');
     const capitulos = datosSerieActual[idx];
+    
+    // Generar botones de capítulos
     listado.innerHTML = capitulos.map((link, i) => `
         <button class="btn-cap" tabindex="40" onclick="gestionarFuenteVideoTV('${link.trim()}')">
             Episodio ${i+1}
         </button>
     `).join('');
+    
+    // Reproducir el primero de esa temporada automáticamente
     gestionarFuenteVideoTV(capitulos[0].trim());
 }
 
 function gestionarFuenteVideoTV(url) {
     const container = document.getElementById('v-container');
     if(hlsInstance) hlsInstance.destroy();
+    
     container.innerHTML = `<video id="v-main" controls autoplay style="width:100%; height:100%;"></video>`;
     const v = document.getElementById('v-main');
     
-    if (url.includes('.m3u8') && Hls.isSupported()) {
-        hlsInstance = new Hls(); hlsInstance.loadSource(url); hlsInstance.attachMedia(v);
-    } else { v.src = url; }
+    const urlLimpia = url.trim();
+    
+    if (urlLimpia.includes('.m3u8') && Hls.isSupported()) {
+        hlsInstance = new Hls(); 
+        hlsInstance.loadSource(urlLimpia); 
+        hlsInstance.attachMedia(v);
+        hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => v.play());
+    } else { 
+        v.src = urlLimpia; 
+        v.play();
+    }
 }
 
 function cerrarReproductor() { 
@@ -120,18 +145,28 @@ function cerrarReproductor() {
     document.getElementById('v-container').innerHTML = '';
 }
 
-// --- CONTROL REMOTO ---
+// --- LÓGICA DE CONTROL REMOTO ---
 document.addEventListener('keydown', (e) => {
     if (!lIntro.classList.contains('hidden')) { finalizarIntro(); return; }
     
-    const el = Array.from(document.querySelectorAll('button, input, select, .poster, .btn-cap')).filter(x => x.offsetParent !== null);
+    // Elementos navegables: botones, inputs, selectores, posters y botones de capítulos
+    const el = Array.from(document.querySelectorAll('button, input, select, .poster, .btn-cap'))
+                    .filter(x => x.offsetParent !== null);
+    
     let i = el.indexOf(document.activeElement);
 
     if (e.keyCode === 37) i = Math.max(0, i - 1); // Izquierda
     else if (e.keyCode === 39) i = Math.min(el.length - 1, i + 1); // Derecha
-    else if (e.keyCode === 38) i = Math.max(0, i - 1); // Arriba
-    else if (e.keyCode === 40) i = Math.min(el.length - 1, i + 1); // Abajo
-    else if (e.keyCode === 13) {
+    else if (e.keyCode === 38) { // Arriba
+        // En listas verticales como capítulos, sube uno a uno
+        if (document.activeElement.classList.contains('btn-cap')) i = Math.max(0, i - 1);
+        else i = Math.max(0, i - 4);
+    } 
+    else if (e.keyCode === 40) { // Abajo
+        if (document.activeElement.classList.contains('btn-cap')) i = Math.min(el.length - 1, i + 1);
+        else i = Math.min(el.length - 1, i + 4);
+    }
+    else if (e.keyCode === 13) { // OK
         if (document.activeElement.tagName === 'SELECT') return; 
         document.activeElement.click(); 
     }
@@ -139,6 +174,8 @@ document.addEventListener('keydown', (e) => {
     if (el[i]) el[i].focus();
 });
 
+// Navegación Básica
 function seleccionarMarca(m) { currentBrand = m; actualizarVista(); }
 function cambiarTipo(t) { currentType = t; actualizarVista(); }
 function entrar() { document.getElementById('sc-login').classList.add('hidden'); document.getElementById('sc-main').classList.remove('hidden'); }
+function cerrarSesion() { location.reload(); }
