@@ -1,168 +1,121 @@
-// CONFIGURACIÓN DE TU FIREBASE (Mismo que tu Android)
 const firebaseConfig = { databaseURL: "https://nebula-plus-app-default-rtdb.firebaseio.com/" };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-let movies = []; let users = []; let currentBrand = 'disney'; let currentType = 'pelicula';
-let hlsInstance = null; let datosSerieActual = [];
+let movies = []; let currentBrand = 'disney'; let currentType = 'pelicula';
+let datosSerieActual = []; let hlsInstance = null;
 
-// 1. CONTROL DE INTRO
-const vIntro = document.getElementById('intro-video'), lIntro = document.getElementById('intro-layer');
-function skipIntro() {
-    lIntro.style.display = 'none';
-    document.getElementById('sc-login').classList.remove('hidden');
-    document.getElementById('log-u').focus();
-}
-if(vIntro) {
-    vIntro.onended = skipIntro;
-    // Seguro de 6 segundos si el video falla
-    setTimeout(() => { if(lIntro.style.display !== 'none') skipIntro(); }, 6000);
-}
-
-// 2. ESCUCHADORES DE FIREBASE (Sincronizado con tu Panel)
-// Escuchamos la carpeta 'users' exactamente como tu Android
-db.ref('users').on('value', snap => {
-    const data = snap.val(); 
-    users = [];
-    if(data) { 
-        for(let id in data) { 
-            users.push(data[id]); 
-        } 
-        console.log("Usuarios cargados:", users.length);
-    }
-});
-
-// Escuchamos la carpeta 'movies'
+// 1. CARGA DE DATOS
 db.ref('movies').on('value', snap => {
-    const data = snap.val(); 
+    const data = snap.val();
     movies = [];
-    if(data) { 
-        for(let id in data) { 
-            movies.push(data[id]); 
-        } 
-    }
+    if(data) { for(let id in data) { movies.push({ ...data[id], firebaseId: id }); } }
     actualizarVista();
 });
 
-// 3. FUNCIÓN DE ENTRADA (LOGICA ANDROID)
-function entrar() {
-    const userIn = document.getElementById('log-u').value.trim();
-    const passIn = document.getElementById('log-p').value.trim();
-    
-    // Buscamos coincidencia con 'u' y 'p' que es como lo guarda tu panel
-    const encontrado = users.find(x => x.u === userIn && x.p === passIn);
+// 2. NAVEGACIÓN ESPACIAL PARA CONTROL REMOTO
+document.addEventListener('keydown', (e) => {
+    const teclas = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Enter"];
+    if (!teclas.includes(e.key)) return;
 
-    if(encontrado) {
-        document.getElementById('sc-login').classList.add('hidden');
-        document.getElementById('sc-main').classList.remove('hidden');
-        document.getElementById('search-box').focus();
-    } else {
-        // Mensaje de ayuda para depurar
-        alert("Usuario o PIN incorrectos. Revisa tu panel de Android.");
-    }
-}
+    const actual = document.activeElement;
+    if (e.key === "Enter") { actual.click(); return; }
 
-function cerrarSesion() { location.reload(); }
+    const todos = Array.from(document.querySelectorAll('[tabindex="0"], button, input, .poster, select'))
+                       .filter(el => el.offsetParent !== null);
 
-// 4. VISTAS Y FILTROS
-function seleccionarMarca(b) { currentBrand = b; actualizarVista(); }
-function cambiarTipo(t) { 
-    currentType = t; 
-    document.getElementById('t-peli').classList.toggle('active', t === 'pelicula');
-    document.getElementById('t-serie').classList.toggle('active', t === 'serie');
-    actualizarVista(); 
-}
+    const rectActual = actual.getBoundingClientRect();
+    const centroActual = { x: rectActual.left + rectActual.width/2, y: rectActual.top + rectActual.height/2 };
 
+    let mejorCand = null; let distMin = Infinity;
+
+    todos.forEach(cand => {
+        if (cand === actual) return;
+        const rC = cand.getBoundingClientRect();
+        const cC = { x: rC.left + rC.width/2, y: rC.top + rC.height/2 };
+        const dx = cC.x - centroActual.x; const dy = cC.y - centroActual.y;
+
+        let esValido = false;
+        if (e.key === "ArrowRight" && dx > 0 && Math.abs(dy) < Math.abs(dx)) esValido = true;
+        if (e.key === "ArrowLeft" && dx < 0 && Math.abs(dy) < Math.abs(dx)) esValido = true;
+        if (e.key === "ArrowDown" && dy > 0 && Math.abs(dx) < Math.abs(dy)) esValido = true;
+        if (e.key === "ArrowUp" && dy < 0 && Math.abs(dx) < Math.abs(dy)) esValido = true;
+
+        if (esValido) {
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist < distMin) { distMin = dist; mejorCand = cand; }
+        }
+    });
+
+    if (mejorCand) { mejorCand.focus(); e.preventDefault(); }
+});
+
+// 3. FUNCIONES DE VISTA
 function actualizarVista() {
     const grid = document.getElementById('grid');
-    if(!grid) return;
-    const term = document.getElementById('search-box').value.toLowerCase();
-    
-    // Filtramos por Marca, Tipo y Buscador
-    const filtrados = movies.filter(m => 
-        m.brand === currentBrand && 
-        m.type === currentType && 
-        m.title.toLowerCase().includes(term)
-    );
-    
+    const filtrados = movies.filter(m => m.brand === currentBrand && m.type === currentType);
     grid.innerHTML = filtrados.map(m => `
-        <div class="poster" tabindex="20" style="background-image:url('${m.poster}')" 
-             onclick="reproducir('${m.video}', '${m.title}', '${m.type}')">
-        </div>
+        <div class="poster" tabindex="0" style="background-image:url('${m.poster}')" 
+             onclick="reproducir('${m.video}', '${m.title}')"></div>
     `).join('');
 }
 
-// 5. REPRODUCTOR SUPER TV
-function reproducir(url, titulo, tipo) {
+function reproducir(url, titulo) {
     document.getElementById('video-player').classList.remove('hidden');
     document.getElementById('player-title').innerText = titulo;
-    const ctrl = document.getElementById('serie-controls');
-
-    if(tipo === 'serie') {
-        ctrl.classList.remove('hidden');
-        const temporadas = url.split('|');
-        datosSerieActual = temporadas.map(t => t.split(','));
-        const sel = document.getElementById('season-selector');
-        sel.innerHTML = datosSerieActual.map((_, i) => `<option value="${i}">Temporada ${i+1}</option>`).join('');
-        cargarTemporadaTV(0);
+    const item = movies.find(m => m.title === titulo);
+    
+    if(item && item.type === 'serie') {
+        document.getElementById('serie-controls').classList.remove('hidden');
+        const temps = item.video.split('|');
+        datosSerieActual = temps.map(t => t.split(','));
+        document.getElementById('season-selector').innerHTML = datosSerieActual.map((_,i) => `<option value="${i}">Temporada ${i+1}</option>`).join('');
+        cargarTemporada(0);
     } else {
-        ctrl.classList.add('hidden');
-        gestionarVideo(url);
+        document.getElementById('serie-controls').classList.add('hidden');
+        gestionarFuenteVideo(url);
     }
 }
 
-function cargarTemporadaTV(idx) {
-    const list = document.getElementById('chapters-list');
-    const caps = datosSerieActual[idx];
-    list.innerHTML = caps.map((link, i) => `
-        <button class="btn-cap-st" tabindex="40" onclick="gestionarVideo('${link.trim()}')">CAP ${i+1}</button>
-    `).join('');
-    gestionarVideo(caps[0].trim());
+function gestionarFuenteVideo(url) {
+    const frame = document.querySelector('.video-frame');
+    if(hlsInstance) hlsInstance.destroy();
+    frame.innerHTML = '';
+    if (url.includes('.m3u8')) {
+        frame.innerHTML = `<video id="vid" controls autoplay style="width:100%;height:100%"></video>`;
+        hlsInstance = new Hls(); hlsInstance.loadSource(url); hlsInstance.attachMedia(document.getElementById('vid'));
+    } else if(url.includes('.mp4')) {
+        frame.innerHTML = `<video src="${url}" controls autoplay style="width:100%;height:100%"></video>`;
+    } else {
+        frame.innerHTML = `<iframe src="${url}" style="width:100%;height:100%" allowfullscreen></iframe>`;
+    }
 }
 
-function gestionarVideo(url) {
-    const cont = document.getElementById('v-container');
-    if(hlsInstance) hlsInstance.destroy();
-    cont.innerHTML = `<video id="v-main" autoplay style="width:100%; height:100%;"></video>`;
-    const v = document.getElementById('v-main');
-    const u = url.trim();
-    
-    if(u.includes('.m3u8')) {
-        hlsInstance = new Hls(); hlsInstance.loadSource(u); hlsInstance.attachMedia(v);
-    } else { v.src = u; }
+function cargarTemporada(idx) {
+    const grid = document.getElementById('episodes-grid');
+    grid.innerHTML = datosSerieActual[idx].map((link, i) => `
+        <button class="btn-ep" tabindex="0" onclick="gestionarFuenteVideo('${link.trim()}')">EP ${i+1}</button>
+    `).join('');
 }
 
 function cerrarReproductor() { 
-    document.getElementById('video-player').classList.add('hidden'); 
     if(hlsInstance) hlsInstance.destroy(); 
+    document.getElementById('video-player').classList.add('hidden'); 
 }
 
-// 6. NAVEGACIÓN MANDO (Flechas y OK)
-document.addEventListener('keydown', (e) => {
-    const el = Array.from(document.querySelectorAll('button, input, select, .poster, .btn-cap-st')).filter(x => x.offsetParent !== null);
-    let i = el.indexOf(document.activeElement);
+function entrar() { switchScreen('sc-main'); setTimeout(()=>document.querySelector('.nav-item').focus(), 500); }
+function seleccionarMarca(b) { currentBrand = b; actualizarVista(); }
+function cambiarTipo(t) { currentType = t; actualizarVista(); }
+function switchScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
+function abrirAdmin() { if(prompt("Pass:") === "2026") switchScreen('sc-admin'); }
 
-    if (e.keyCode === 37) i = Math.max(0, i - 1);
-    else if (e.keyCode === 39) i = Math.min(el.length - 1, i + 1);
-    else if (e.keyCode === 38) {
-        if(document.activeElement.classList.contains('poster')) i = Math.max(0, i - 5);
-        else i = Math.max(0, i - 1);
-    }
-    else if (e.keyCode === 40) {
-        if(document.activeElement.classList.contains('poster')) i = Math.min(el.length - 1, i + 5);
-        else i = Math.min(el.length - 1, i + 1);
-    }
-    else if (e.keyCode === 13) {
-        if(document.activeElement.tagName === 'BODY') {
-            const v = document.getElementById('v-main');
-            if(v) { if(v.paused) v.play(); else v.pause(); }
-        } else {
-            document.activeElement.click();
-        }
-    }
-
-    if (el[i]) {
-        el[i].focus();
-        el[i].scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-});
+function guardarContenido() {
+    const data = {
+        title: document.getElementById('c-title').value,
+        poster: document.getElementById('c-post').value,
+        video: document.getElementById('c-video').value,
+        brand: document.getElementById('c-brand').value,
+        type: document.getElementById('c-type').value
+    };
+    db.ref('movies').push(data); alert("Publicado");
+}
