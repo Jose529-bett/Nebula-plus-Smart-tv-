@@ -1,84 +1,142 @@
-// CONFIG FIREBASE
-const firebaseConfig = { databaseURL: "https://nebula-plus-app-default-rtdb.firebaseio.com/" };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+// Configuración de tu base de datos
+const fbConf = { databaseURL: "https://nebula-plus-app-default-rtdb.firebaseio.com/" };
+firebase.initializeApp(fbConf);
+const database = firebase.database();
 
-let movies = []; let currentBrand = 'disney'; let currentType = 'pelicula';
-let hlsInstance = null; let videoActual = null;
+let allContent = [];
+let brandActive = 'disney';
+let typeActive = 'pelicula';
+let currentVideo = null;
+let hls = null;
 
-// CARGAR DATOS (Recibe lo que subas desde el móvil)
-db.ref('movies').on('value', snap => {
-    const data = snap.val();
-    movies = [];
-    if(data) { for(let id in data) movies.push({...data[id], firebaseId: id}); }
-    actualizarVista();
+// 1. CONTROL DE FLUJO
+window.onload = () => {
+    setTimeout(() => {
+        document.getElementById('sc-intro').classList.add('hidden');
+        document.getElementById('sc-login').classList.remove('hidden');
+        document.getElementById('log-u').focus();
+    }, 3000); // 3 segundos de intro
+};
+
+function validarLogin() {
+    // Simulación de login exitoso
+    document.getElementById('sc-login').classList.add('hidden');
+    document.getElementById('sc-main').classList.remove('hidden');
+    navMarca('disney');
+}
+
+// 2. BUSCADOR INTELIGENTE
+document.getElementById('tv-search').addEventListener('input', (e) => {
+    const query = e.target.value.toLowerCase();
+    const filtrados = allContent.filter(c => c.title.toLowerCase().includes(query));
+    renderizarGrid(filtrados);
 });
 
-// NAVEGACIÓN ESPACIAL (Smart TV)
-document.addEventListener('keydown', (e) => {
-    const actual = document.activeElement;
-    const todos = Array.from(document.querySelectorAll('[tabindex="0"]')).filter(el => el.offsetParent !== null);
-    if(e.key === "Enter") { actual.click(); return; }
+// 3. NAVEGACIÓN
+function navMarca(m) {
+    brandActive = m;
+    renderizarGrid();
+}
 
-    const rA = actual.getBoundingClientRect();
-    const cA = { x: rA.left + rA.width/2, y: rA.top + rA.height/2 };
-    let mejor = null; let dMin = Infinity;
+function setFiltroTipo(t) {
+    typeActive = t;
+    document.getElementById('tab-peli').classList.toggle('active', t==='pelicula');
+    document.getElementById('tab-serie').classList.toggle('active', t==='serie');
+    renderizarGrid();
+}
 
-    todos.forEach(cand => {
-        if(cand === actual) return;
-        const rC = cand.getBoundingClientRect();
-        const cC = { x: rC.left + rC.width/2, y: rC.top + rC.height/2 };
-        const dx = cC.x - cA.x; const dy = cC.y - cA.y;
-        let ok = false;
-        if(e.key === "ArrowRight" && dx > 10 && Math.abs(dy) < Math.abs(dx)) ok = true;
-        if(e.key === "ArrowLeft" && dx < -10 && Math.abs(dy) < Math.abs(dx)) ok = true;
-        if(e.key === "ArrowDown" && dy > 10 && Math.abs(dx) < Math.abs(dy)) ok = true;
-        if(e.key === "ArrowUp" && dy < -10 && Math.abs(dx) < Math.abs(dy)) ok = true;
-        if(ok) {
-            const d = Math.sqrt(dx*dx + dy*dy);
-            if(d < dMin) { dMin = d; mejor = cand; }
-        }
-    });
-    if(mejor) { mejor.focus(); mejor.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-});
-
-// REPRODUCTOR PROTEGIDO
-function gestionarFuenteVideo(url) {
-    const frame = document.querySelector('.video-frame');
-    const loader = document.getElementById('loading-screen');
-    loader.classList.remove('hidden');
+// 4. REPRODUCTOR INTELIGENTE (Identifica Película o Serie)
+function abrirReproductor(item) {
+    const player = document.getElementById('video-player');
+    const panelSeries = document.getElementById('series-panel');
+    const displayTitle = document.getElementById('v-display-title');
     
-    if(hlsInstance) hlsInstance.destroy();
-    frame.innerHTML = `<video id="main-v" controlsList="nodownload" oncontextmenu="return false;" style="width:100%;height:100vh"></video>`;
-    videoActual = document.getElementById('main-v');
+    player.classList.remove('hidden');
+    displayTitle.innerText = item.title;
+
+    // --- LÓGICA DE IDENTIFICACIÓN ---
+    if (item.type === 'serie' || item.episodios) {
+        console.log("Modo Inteligente: SERIE Detectada.");
+        panelSeries.classList.remove('hidden');
+        generarCapitulos(item.episodios, item.title);
+        
+        // Cargar el primer capítulo automáticamente si existe
+        if(item.episodios) {
+            const primerEp = Object.values(item.episodios)[0].video;
+            prepararVideo(primerEp);
+        }
+    } else {
+        console.log("Modo Inteligente: PELÍCULA Detectada.");
+        panelSeries.classList.add('hidden');
+        prepararVideo(item.video); // Reproducción instantánea
+    }
+}
+
+function generarCapitulos(eps, tituloSerie) {
+    const container = document.getElementById('episodes-list');
+    container.innerHTML = "";
+    Object.keys(eps).forEach((key, i) => {
+        const btn = document.createElement('button');
+        btn.className = "ep-btn";
+        btn.tabIndex = 30 + i;
+        btn.innerText = `Episodio ${i + 1}`;
+        btn.onclick = () => {
+            document.getElementById('v-display-title').innerText = `${tituloSerie} - E${i+1}`;
+            prepararVideo(eps[key].video);
+        };
+        container.appendChild(btn);
+    });
+}
+
+function prepararVideo(url) {
+    const wrapper = document.getElementById('v-wrapper');
+    const loader = document.getElementById('nebula-loader');
+    
+    if(hls) hls.destroy();
+    wrapper.innerHTML = `<video id="main-v" style="width:100%; height:100vh;"></video>`;
+    currentVideo = document.getElementById('main-v');
+
+    loader.classList.add('loading-on');
+    currentVideo.onplaying = () => loader.classList.remove('loading-on');
 
     if(url.includes('.m3u8')) {
-        hlsInstance = new Hls(); hlsInstance.loadSource(url); hlsInstance.attachMedia(videoActual);
-    } else { videoActual.src = url; }
+        hls = new Hls(); hls.loadSource(url); hls.attachMedia(currentVideo);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => currentVideo.play());
+    } else {
+        currentVideo.src = url; currentVideo.play();
+    }
 
-    videoActual.oncanplay = () => { loader.classList.add('hidden'); videoActual.play(); };
-    videoActual.onwaiting = () => loader.classList.remove('hidden');
-    videoActual.onplaying = () => loader.classList.add('hidden');
-    videoActual.ontimeupdate = () => {
-        const p = (videoActual.currentTime / videoActual.duration) * 100;
-        document.getElementById('progress-bar').style.width = p + "%";
+    currentVideo.ontimeupdate = () => {
+        const pct = (currentVideo.currentTime / currentVideo.duration) * 100;
+        document.getElementById('v-bar').style.width = pct + "%";
     };
 }
 
-// LOGICA APP
-function actualizarVista() {
+function togglePlay() {
+    if(currentVideo.paused) { currentVideo.play(); } else { currentVideo.pause(); }
+}
+
+function cerrarReproductor() {
+    if(currentVideo) currentVideo.pause();
+    document.getElementById('video-player').classList.add('hidden');
+}
+
+// 5. CARGA DESDE FIREBASE
+database.ref('movies').on('value', res => {
+    const data = res.val();
+    allContent = [];
+    for(let id in data) allContent.push({...data[id], id});
+    renderizarGrid();
+});
+
+function renderizarGrid(dataCustom = null) {
     const grid = document.getElementById('grid');
-    const filtrados = movies.filter(m => m.brand === currentBrand && m.type === currentType);
-    grid.innerHTML = filtrados.map(m => `<div class="poster" tabindex="0" style="background-image:url('${m.poster}')" onclick="reproducir('${m.video}', '${m.title}')"></div>`).join('');
+    const lista = dataCustom ? dataCustom : allContent.filter(c => c.brand === brandActive && c.type === typeActive);
+    
+    grid.innerHTML = lista.map(item => `
+        <div class="poster-card" tabindex="0" 
+             style="background-image:url('${item.poster}')"
+             onclick='abrirReproductor(${JSON.stringify(item).replace(/'/g, "&apos;")})'>
+        </div>
+    `).join('');
 }
-
-function reproducir(url, titulo) {
-    document.getElementById('video-player').classList.remove('hidden');
-    document.getElementById('player-title').innerText = titulo;
-    gestionarFuenteVideo(url);
-}
-
-function cerrarReproductor() { if(hlsInstance) hlsInstance.destroy(); document.getElementById('video-player').classList.add('hidden'); }
-function entrar() { document.getElementById('sc-login').classList.add('hidden'); document.getElementById('sc-main').classList.remove('hidden'); setTimeout(()=>document.querySelector('.brand-btn').focus(), 500); }
-function seleccionarMarca(b) { currentBrand = b; actualizarVista(); }
-function cambiarTipo(t) { currentType = t; actualizarVista(); }
