@@ -1,9 +1,8 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nebula+ | Smart TV Pro</title>
+    <title>Nebula+ | SuperTV Edition</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -30,26 +29,23 @@
         <nav class="navbar">
             <div class="nav-top">
                 <span class="logo-s">NEBULA+</span>
-                <input type="text" id="search-input" placeholder="Buscar..." onkeyup="actualizarVista()" tabindex="4">
+                <input type="text" id="search-box" placeholder="Buscar..." onkeyup="actualizarVista()" tabindex="4">
                 <button class="btn-exit" onclick="cerrarSesion()" tabindex="5">SALIR</button>
             </div>
-            
-            <div class="brand-bar">
+            <div class="brand-bar" id="brand-bar">
                 <button onclick="seleccionarMarca('disney')" tabindex="6">DISNEY+</button>
                 <button onclick="seleccionarMarca('netflix')" tabindex="7">NETFLIX</button>
                 <button onclick="seleccionarMarca('hbo')" tabindex="8">HBO MAX</button>
                 <button onclick="seleccionarMarca('paramount')" tabindex="9">PARAMOUNT+</button>
-                <button onclick="seleccionarMarca('apple tv')" tabindex="10">APPLE TV</button>
+                <button onclick="seleccionarMarca('apple')" tabindex="10">APPLE TV</button>
                 <button onclick="seleccionarMarca('natgeo')" tabindex="11">NAT GEO</button>
                 <button onclick="seleccionarMarca('espn')" tabindex="12">ESPN</button>
             </div>
-
             <div class="category-tabs">
                 <button id="t-peli" class="active" onclick="cambiarTipo('pelicula')" tabindex="15">PELÍCULAS</button>
                 <button id="t-serie" onclick="cambiarTipo('serie')" tabindex="16">SERIES</button>
             </div>
         </nav>
-
         <div id="grid" class="movie-grid"></div>
     </div>
 
@@ -57,12 +53,15 @@
         <div class="video-container-st" id="v-container"></div>
         <div id="st-ui" class="st-interface">
             <div class="st-top">
-                <h2 id="player-title">Cargando...</h2>
+                <div class="st-info">
+                    <h2 id="player-title">Cargando...</h2>
+                    <span class="badge">VOD PREMIUM</span>
+                </div>
                 <button class="btn-st-close" id="btn-close" onclick="cerrarReproductor()" tabindex="30">✕ SALIR</button>
             </div>
             <div id="serie-controls" class="st-bottom hidden">
-                <div class="st-season">
-                    <span>TEMPORADA:</span>
+                <div class="st-season-row">
+                    <label>TEMPORADA:</label>
                     <select id="season-selector" onchange="cargarTemporadaTV(this.value)" tabindex="35"></select>
                 </div>
                 <div id="chapters-list" class="chapters-row"></div>
