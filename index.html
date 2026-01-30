@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nebula+ | Smart TV Experience</title>
+    <title>Nebula+ | Smart TV</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -12,9 +12,10 @@
 <body>
 
     <div id="intro-layer" class="intro-overlay">
-        <video id="intro-video" autoplay muted playsinline>
+        <video id="intro-video" autoplay playsinline>
             <source src="https://archive.org/download/k2t97yzrh9rmy0cw1kqs3e2yx8_result__202601/k2t97yzrh9rmy0cw1kqs3e2yx8_result_.ia.mp4" type="video/mp4">
         </video>
+        <div id="audio-msg" style="position:fixed; bottom:10%; width:100%; text-align:center; color:white; font-size:14px; opacity:0.6;">Presiona cualquier tecla para activar audio 🔊</div>
     </div>
 
     <div id="sc-login" class="screen hidden">
@@ -30,22 +31,27 @@
         <nav class="navbar">
             <div class="nav-top">
                 <span class="logo-s">NEBULA+</span>
-                <input type="text" id="search-input" placeholder="🔍 Buscar en el catálogo..." onkeyup="actualizarVista()" tabindex="4">
-                <button class="btn-exit" onclick="cerrarSesion()" tabindex="5">CERRAR SESIÓN</button>
+                <input type="text" id="search-input" placeholder="Buscar..." onkeyup="actualizarVista()" tabindex="4">
+                <button class="btn-exit" onclick="cerrarSesion()" tabindex="5">SALIR</button>
             </div>
-            <div class="nav-bottom">
-                <div class="brand-bar">
-                    <button onclick="seleccionarMarca('disney')" tabindex="6">DISNEY</button>
-                    <button onclick="seleccionarMarca('netflix')" tabindex="7">NETFLIX</button>
-                    <button onclick="seleccionarMarca('hbo')" tabindex="8">HBO MAX</button>
-                    <button onclick="seleccionarMarca('paramount')" tabindex="9">PARAMOUNT</button>
-                </div>
-                <div class="tabs">
-                    <button id="t-peli" class="active" onclick="cambiarTipo('pelicula')" tabindex="10">PELÍCULAS</button>
-                    <button id="t-serie" onclick="cambiarTipo('serie')" tabindex="11">SERIES</button>
-                </div>
+            
+            <div class="brand-bar">
+                <button onclick="seleccionarMarca('disney')" tabindex="6">DISNEY</button>
+                <button onclick="seleccionarMarca('netflix')" tabindex="7">NETFLIX</button>
+                <button onclick="seleccionarMarca('hbo')" tabindex="8">HBO MAX</button>
+                <button onclick="seleccionarMarca('paramount')" tabindex="9">PARAMOUNT</button>
+                <button onclick="seleccionarMarca('apple tv')" tabindex="10">APPLE TV</button>
+                <button onclick="seleccionarMarca('espn')" tabindex="11">ESPN</button>
+                <button onclick="seleccionarMarca('nat geo')" tabindex="12">NAT GEO</button>
+            </div>
+
+            <div class="category-tabs">
+                <button id="t-peli" class="active" onclick="cambiarTipo('pelicula')" tabindex="13">PELÍCULAS</button>
+                <button id="t-serie" onclick="cambiarTipo('serie')" tabindex="14">SERIES</button>
+                <span id="current-label" class="label-view">DISNEY > PELICULA</span>
             </div>
         </nav>
+
         <div class="main-content">
             <div id="grid" class="movie-grid"></div>
         </div>
