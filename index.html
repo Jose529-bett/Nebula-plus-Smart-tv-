@@ -1,62 +1,86 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nebula+ TV</title>
-
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nebula+ | Premium Smart TV</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div id="sc-login" class="screen">
-    <div class="login-container">
-        <h1 class="logo-title">NEBULA<span>+</span></h1>
-        <input type="text" id="log-u" placeholder="Usuario">
-        <input type="password" id="log-p" placeholder="Contraseña">
-        <button onclick="entrar()">ENTRAR</button>
-    </div>
-</div>
-
-<div id="sc-main" class="screen hidden">
-    <nav class="navbar">
-        <div class="brand-bar">
-            <button onclick="seleccionarMarca('disney')">DISNEY</button>
-            <button onclick="seleccionarMarca('netflix')">NETFLIX</button>
-            <button onclick="seleccionarMarca('hbo')">HBO MAX</button>
-            <button onclick="seleccionarMarca('paramount')">PARAMOUNT</button>
-            <button onclick="seleccionarMarca('apple')">APPLE TV</button>
-            <button onclick="seleccionarMarca('espn')">ESPN</button>
-            <button onclick="seleccionarMarca('natgeo')">NAT GEO</button>
-        </div>
-    </nav>
-
-    <div class="tabs">
-        <button id="t-peli" onclick="cambiarTipo('pelicula')">PELÍCULAS</button>
-        <button id="t-serie" onclick="cambiarTipo('serie')">SERIES</button>
-    </div>
-
-    <h2 id="cat-title"></h2>
-    <div id="grid" class="movie-grid"></div>
-</div>
-
-<div id="video-player" class="player-overlay hidden">
-    <div class="player-container">
-        <button onclick="cerrarReproductor()">CERRAR</button>
-        <div class="video-frame"></div>
-        <h2 id="player-title"></h2>
-
-        <div id="serie-controls" class="hidden">
-            <select id="season-selector" onchange="cargarTemporada(this.value)"></select>
-            <div id="episodes-grid" class="episodes-grid"></div>
+    <div id="sc-login" class="screen">
+        <div class="login-box">
+            <div class="login-header">
+                <h1 class="logo-title">NEBULA<span>+</span></h1>
+                <p>Bienvenido de nuevo</p>
+            </div>
+            <div class="login-form">
+                <input type="text" id="log-u" placeholder="Usuario" class="focusable" tabindex="1">
+                <input type="password" id="log-p" placeholder="Contraseña" class="focusable" tabindex="2">
+                <button class="btn-login-main focusable" onclick="entrar()" tabindex="3">ENTRAR</button>
+            </div>
         </div>
     </div>
-</div>
 
-<script src="script.js"></script>
+    <div id="sc-main" class="screen hidden">
+        <nav class="navbar">
+            <div class="nav-top">
+                <span class="logo-s">NEBULA+</span>
+                <input type="text" id="search-box" placeholder="Buscar película o serie..." oninput="buscar()" class="focusable">
+                <div class="user-zone">
+                    <button class="avatar focusable" onclick="toggleMenu()">👤</button>
+                    <div id="drop-menu" class="dropdown hidden">
+                        <p id="u-name"></p>
+                        <button class="btn-logout focusable" onclick="cerrarSesion()">Cerrar Sesión</button>
+                    </div>
+                </div>
+            </div>
+            <div class="brand-bar">
+                <button class="focusable" onclick="seleccionarMarca('disney')">DISNEY</button>
+                <button class="focusable" onclick="seleccionarMarca('netflix')">NETFLIX</button>
+                <button class="focusable" onclick="seleccionarMarca('hbo')">HBO MAX</button>
+                <button class="focusable" onclick="seleccionarMarca('paramount')">PARAMOUNT</button>
+                <button class="focusable" onclick="seleccionarMarca('apple')">APPLE TV</button>
+                <button class="focusable" onclick="seleccionarMarca('espn')">ESPN</button>
+                <button class="focusable" onclick="seleccionarMarca('natgeo')">NAT GEO</button>
+            </div>
+        </nav>
+        <div class="main-content">
+            <div class="tabs">
+                <button id="t-peli" class="active focusable" onclick="cambiarTipo('pelicula')">PELÍCULAS</button>
+                <button id="t-serie" class="focusable" onclick="cambiarTipo('serie')">SERIES</button>
+            </div>
+            <h2 id="cat-title">CATÁLOGO</h2>
+            <div id="grid" class="movie-grid"></div>
+        </div>
+    </div>
+
+    <div id="video-player" class="player-overlay hidden">
+        <div class="video-frame" id="v-frame"></div>
+        <div class="player-ui">
+            <div class="ui-top">
+                <div class="title-container">
+                    <h2 id="player-title">Título</h2>
+                </div>
+                <button class="btn-red focusable" onclick="cerrarReproductor()">✕ CERRAR</button>
+            </div>
+            <div class="ui-bottom">
+                <div class="controls-row">
+                    <button class="btn-p focusable" onclick="controlVideo('rewind')">⏪ -10s</button>
+                    <button id="play-pause" class="btn-p focusable" onclick="controlVideo('toggle')">PAUSA</button>
+                    <button class="btn-p focusable" onclick="controlVideo('forward')">10s ⏩</button>
+                </div>
+                <div id="serie-controls" class="hidden">
+                    <h3 style="color: #0063e5; margin-bottom:10px;">Capítulos:</h3>
+                    <div id="episodes-grid" class="episodes-grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
