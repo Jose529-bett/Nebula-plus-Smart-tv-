@@ -27,7 +27,11 @@
         <nav class="navbar">
             <div class="nav-top">
                 <span class="logo-title" style="font-size: 26px; margin:0;">NEBULA<span>+</span></span>
-                <input type="text" id="search-box" class="tv-focusable" placeholder="Buscar..." onkeyup="buscar()">
+                
+                <div class="search-area">
+                    <input type="text" id="search-box" class="tv-focusable" placeholder="Buscar..." oninput="buscar()">
+                </div>
+
                 <div class="user-zone">
                     <button class="avatar tv-focusable" onclick="toggleMenu()">👤</button>
                     <div id="drop-menu" class="dropdown hidden">
