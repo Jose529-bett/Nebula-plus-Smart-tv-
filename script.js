@@ -2,11 +2,15 @@ const firebaseConfig = { databaseURL: "https://nebula-plus-app-default-rtdb.fire
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-let users = []; let movies = []; let currentBrand = 'disney'; let currentType = 'pelicula';
-let videoActualUrl = ""; let hlsInstance = null;
+let users = []; 
+let movies = []; 
+let currentBrand = 'disney'; 
+let currentType = 'pelicula';
+let videoActualUrl = ""; 
+let hlsInstance = null;
 
 // ==========================================
-// CONTROL REMOTO - NAVEGACIÓN Y PLAY/PAUSE
+// CONTROL REMOTO - NAVEGACIÓN Y PLAYER
 // ==========================================
 document.addEventListener('keydown', (e) => {
     const activeScreen = document.querySelector('.screen:not(.hidden), .player-overlay:not(.hidden)');
@@ -17,29 +21,38 @@ document.addEventListener('keydown', (e) => {
     const cols = 8; 
 
     const elActivo = document.activeElement;
-    const esPoster = elActivo.classList.contains('poster');
-    const esBuscador = elActivo.id === 'search-box';
-    const esPlayerActivo = !document.getElementById('video-player-final').classList.contains('hidden');
-    const esBotonCerrar = elActivo.classList.contains('btn-close-player');
-    const esVideoCore = elActivo.id === 'v-core';
+    const esPlayerVisible = !document.getElementById('video-player-final').classList.contains('hidden');
 
-    // --- LÓGICA DE PAUSA/PLAY VS CERRAR ---
-    if (e.key === 'Enter' && esPlayerActivo) {
-        e.preventDefault();
-        if (esVideoCore) {
-            const video = document.getElementById('v-core');
-            if (video) {
-                if (video.paused) video.play();
-                else video.pause();
-            }
-        } else if (esBotonCerrar) {
-            cerrarReproductorAFicha();
+    // --- LÓGICA EXCLUSIVA CUANDO EL REPRODUCTOR ESTÁ ABIERTO ---
+    if (esPlayerVisible) {
+        if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            const btnCerrar = document.querySelector('.btn-close-player');
+            if (btnCerrar) btnCerrar.focus(); // Salta directo al botón de cerrar
         }
-        return;
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            const video = document.getElementById('v-core');
+            if (video) video.focus(); // Regresa el foco al video para poder pausar
+        }
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (elActivo.id === 'v-core') {
+                // Si el foco está en el video, pausa/play
+                if (elActivo.paused) elActivo.play(); else elActivo.pause();
+            } else {
+                // Si el foco está en cualquier otra cosa (como el botón cerrar), clic normal
+                elActivo.click();
+            }
+        }
+        return; // Detenemos el resto de la navegación si el player está activo
     }
 
+    // --- NAVEGACIÓN NORMAL (CATÁLOGO Y BARRA SUPERIOR) ---
+    const esPoster = elActivo.classList.contains('poster');
+    const esBuscador = elActivo.id === 'search-box';
+
     if (e.key === 'ArrowRight') {
-        if (esPlayerActivo) return; // Bloquear lateral en player si no hay más botones
         e.preventDefault();
         if (esBuscador) {
             const avatar = document.querySelector('.avatar');
@@ -50,17 +63,13 @@ document.addEventListener('keydown', (e) => {
     }
 
     if (e.key === 'ArrowLeft') {
-        if (esPlayerActivo) return;
         e.preventDefault();
         if (index > 0) focusables[index - 1].focus();
     }
 
     if (e.key === 'ArrowDown') {
         e.preventDefault();
-        if (esPlayerActivo) {
-            // Si estamos en el botón cerrar, bajar el foco al video para poder pausar
-            document.getElementById('v-core').focus();
-        } else if (esPoster) {
+        if (esPoster) {
             if (index + cols < focusables.length) focusables[index + cols].focus();
         } else {
             const primerPoster = document.querySelector('.poster');
@@ -70,10 +79,7 @@ document.addEventListener('keydown', (e) => {
 
     if (e.key === 'ArrowUp') {
         e.preventDefault();
-        if (esPlayerActivo) {
-            // Si estamos en el video, subir el foco al botón cerrar
-            document.querySelector('.btn-close-player').focus();
-        } else if (esPoster) {
+        if (esPoster) {
             const filaActual = Array.from(document.querySelectorAll('.poster')).indexOf(elActivo);
             if (filaActual < cols) {
                 document.getElementById('search-box').focus();
@@ -85,14 +91,53 @@ document.addEventListener('keydown', (e) => {
         }
     }
 
-    if (e.key === 'Enter' && !esPlayerActivo) {
+    if (e.key === 'Enter') {
         e.preventDefault();
         if (elActivo) elActivo.click();
     }
 });
 
 // ==========================================
-// BUSCADOR EN TIEMPO REAL
+// REPRODUCTOR MEJORADO
+// ==========================================
+function lanzarReproductor() {
+    document.getElementById('sc-pre-video').classList.add('hidden');
+    document.getElementById('video-player-final').classList.remove('hidden');
+    const container = document.getElementById('video-canvas');
+    
+    // IMPORTANTE: El video debe ser focusable para que el Enter funcione
+    container.innerHTML = `<video id="v-core" class="tv-focusable" tabindex="0" style="width:100%; height:100%;" autoplay></video>`;
+    const video = document.getElementById('v-core');
+
+    if (videoActualUrl.includes('.m3u8') && Hls.isSupported()) {
+        hlsInstance = new Hls(); 
+        hlsInstance.loadSource(videoActualUrl); 
+        hlsInstance.attachMedia(video);
+    } else { 
+        video.src = videoActualUrl; 
+    }
+
+    document.getElementById('video-title-ui').innerText = document.getElementById('pre-title').innerText;
+    video.ontimeupdate = () => { 
+        const bar = document.getElementById('progress-bar-new');
+        if(bar) bar.style.width = (video.currentTime / video.duration) * 100 + "%"; 
+    };
+
+    // Al iniciar, ponemos el foco en el video para que el OK pause de inmediato
+    setTimeout(() => video.focus(), 500);
+}
+
+function cerrarReproductorAFicha() {
+    const v = document.getElementById('v-core');
+    if(v) { v.pause(); v.src = ""; }
+    if(hlsInstance) hlsInstance.destroy();
+    document.getElementById('video-player-final').classList.add('hidden');
+    document.getElementById('sc-pre-video').classList.remove('hidden');
+    setTimeout(() => document.getElementById('btn-main-play').focus(), 150);
+}
+
+// ==========================================
+// BUSCADOR Y FIREBASE (RESTO DEL CÓDIGO)
 // ==========================================
 function buscar() {
     const q = document.getElementById('search-box').value.toLowerCase();
@@ -102,9 +147,6 @@ function buscar() {
     renderGrid(filtrados);
 }
 
-// ==========================================
-// GESTIÓN DE SESIÓN
-// ==========================================
 function entrar() {
     const u = document.getElementById('log-u').value;
     const p = document.getElementById('log-p').value;
@@ -128,44 +170,6 @@ function cerrarSesion() {
 
 function toggleMenu() { document.getElementById('drop-menu').classList.toggle('hidden'); }
 
-// ==========================================
-// REPRODUCTOR
-// ==========================================
-function lanzarReproductor() {
-    document.getElementById('sc-pre-video').classList.add('hidden');
-    document.getElementById('video-player-final').classList.remove('hidden');
-    const container = document.getElementById('video-canvas');
-    
-    // El video ahora tiene la clase tv-focusable para recibir el foco
-    container.innerHTML = `<video id="v-core" class="tv-focusable" tabindex="0" style="width:100%; height:100%;" autoplay></video>`;
-    const video = document.getElementById('v-core');
-
-    if (videoActualUrl.includes('.m3u8') && Hls.isSupported()) {
-        hlsInstance = new Hls(); hlsInstance.loadSource(videoActualUrl); hlsInstance.attachMedia(video);
-    } else { video.src = videoActualUrl; }
-
-    document.getElementById('video-title-ui').innerText = document.getElementById('pre-title').innerText;
-    video.ontimeupdate = () => { 
-        const bar = document.getElementById('progress-bar-new');
-        if(bar) bar.style.width = (video.currentTime / video.duration) * 100 + "%"; 
-    };
-
-    // Foco inicial al video para pausar con OK de inmediato
-    setTimeout(() => video.focus(), 300);
-}
-
-function cerrarReproductorAFicha() {
-    const v = document.getElementById('v-core');
-    if(v) { v.pause(); v.src = ""; }
-    if(hlsInstance) hlsInstance.destroy();
-    document.getElementById('video-player-final').classList.add('hidden');
-    document.getElementById('sc-pre-video').classList.remove('hidden');
-    setTimeout(() => document.getElementById('btn-main-play').focus(), 150);
-}
-
-// ==========================================
-// FIREBASE Y RENDERS (RESTO DEL CÓDIGO)
-// ==========================================
 db.ref('users').on('value', snap => {
     const data = snap.val(); users = [];
     if(data) for(let id in data) users.push({ ...data[id], id });
