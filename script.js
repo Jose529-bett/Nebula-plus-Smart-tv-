@@ -2,19 +2,56 @@ const firebaseConfig = { databaseURL: "https://nebula-plus-app-default-rtdb.fire
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-let users = []; let movies = []; let currentBrand = 'disney'; let currentType = 'pelicula';
+let users = []; let movies = []; 
+let currentBrand = 'disney'; 
+let currentType = 'pelicula';
 let videoActualUrl = ""; let hlsInstance = null; let guiTimeout;
 
-// CONTROL REMOTO [cite: 2026-02-06]
+// CONTROL REMOTO
 document.addEventListener('keydown', (e) => {
+    const activeScreen = document.querySelector('.screen:not(.hidden), .player-overlay:not(.hidden)');
+    if (!activeScreen) return;
+
     if (!document.getElementById('video-player-final').classList.contains('hidden')) showControls();
+
     if (e.keyCode === 8 || e.keyCode === 27 || e.keyCode === 10009) {
         if (!document.getElementById('video-player-final').classList.contains('hidden')) { cerrarReproductorFinal(); e.preventDefault(); }
-        else if (!document.getElementById('sc-pre-video').classList.contains('hidden')) { document.getElementById('sc-pre-video').classList.add('hidden'); document.getElementById('sc-main').classList.remove('hidden'); e.preventDefault(); }
+        else if (!document.getElementById('sc-pre-video').classList.contains('hidden')) { 
+            document.getElementById('sc-pre-video').classList.add('hidden'); 
+            document.getElementById('sc-main').classList.remove('hidden'); 
+            e.preventDefault(); 
+        }
+        return;
+    }
+
+    const focusables = Array.from(activeScreen.querySelectorAll('.tv-focusable:not(.hidden)'));
+    let index = focusables.indexOf(document.activeElement);
+    let nextIndex = index;
+    const columns = 8; 
+
+    if (e.key === 'ArrowRight') nextIndex = index + 1;
+    if (e.key === 'ArrowLeft') nextIndex = index - 1;
+    if (e.key === 'ArrowDown') {
+        if (document.activeElement.classList.contains('poster')) nextIndex = index + columns;
+        else nextIndex = index + 1;
+    }
+    if (e.key === 'ArrowUp') {
+        if (document.activeElement.classList.contains('poster')) nextIndex = index - columns;
+        else nextIndex = index - 1;
+    }
+
+    if (focusables[nextIndex]) {
+        e.preventDefault();
+        focusables[nextIndex].focus();
+    }
+
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        document.activeElement.click();
     }
 });
 
-// LOGIN Y BUSQUEDA ORIGINAL
+// LOGIN
 function entrar() {
     const u = document.getElementById('log-u').value;
     const p = document.getElementById('log-p').value;
@@ -23,19 +60,42 @@ function entrar() {
         document.getElementById('u-name').innerText = "Hola, " + u;
         document.getElementById('sc-login').classList.add('hidden');
         document.getElementById('sc-main').classList.remove('hidden');
-    } else { alert("Acceso denegado"); }
+        setTimeout(() => document.querySelector('.brand-bar button').focus(), 300);
+    } else { alert("Usuario o contraseña incorrectos"); }
 }
 
+// BÚSQUEDA EN TIEMPO REAL
 function buscar() {
     const q = document.getElementById('search-box').value.toLowerCase();
-    const filtrados = movies.filter(m => m.brand === currentBrand && m.type === currentType && m.title.toLowerCase().includes(q));
+    
+    if (q.trim() === "") {
+        actualizarVista();
+        return;
+    }
+
+    // Búsqueda global en todas las marcas
+    const filtrados = movies.filter(m => m.title.toLowerCase().includes(q));
+    document.getElementById('cat-title').innerText = "Resultados para: " + q;
     renderGrid(filtrados);
 }
 
-function toggleMenu() { document.getElementById('drop-menu').classList.toggle('hidden'); }
-function cerrarSesion() { document.getElementById('sc-main').classList.add('hidden'); document.getElementById('sc-login').classList.remove('hidden'); }
+// MENÚ DE USUARIO Y CERRAR SESIÓN
+function toggleMenu() { 
+    document.getElementById('drop-menu').classList.toggle('hidden'); 
+}
 
-// DATA LOADING
+function cerrarSesion() {
+    // Resetear app
+    document.getElementById('sc-main').classList.add('hidden');
+    document.getElementById('sc-login').classList.remove('hidden');
+    document.getElementById('log-u').value = "";
+    document.getElementById('log-p').value = "";
+    document.getElementById('search-box').value = "";
+    document.getElementById('drop-menu').classList.add('hidden');
+    setTimeout(() => document.getElementById('log-u').focus(), 200);
+}
+
+// DATOS
 db.ref('users').on('value', snap => {
     const data = snap.val(); users = [];
     if(data) for(let id in data) users.push({ ...data[id], id });
@@ -56,18 +116,23 @@ function cambiarTipo(t) {
 }
 
 function actualizarVista() {
-    document.getElementById('cat-title').innerText = currentBrand + " / " + (currentType === 'pelicula' ? 'Películas' : 'Series'); // [cite: 2026-01-31]
+    document.getElementById('cat-title').innerText = currentBrand + " / " + (currentType === 'pelicula' ? 'Películas' : 'Series');
     const filtrados = movies.filter(m => m.brand === currentBrand && m.type === currentType);
     renderGrid(filtrados);
 }
 
 function renderGrid(lista) {
-    document.getElementById('grid').innerHTML = lista.map(m => `
+    const grid = document.getElementById('grid');
+    if (lista.length === 0) {
+        grid.innerHTML = `<p style="margin-left:40px; color:gray;">No se encontraron resultados.</p>`;
+        return;
+    }
+    grid.innerHTML = lista.map(m => `
         <div class="poster tv-focusable" tabindex="0" style="background-image:url('${m.poster}')" onclick="previsualizar('${m.video}', '${m.title}')"></div>
     `).join('');
 }
 
-// VIDEO ENGINE [cite: 2026-01-29]
+// PREVISUALIZACIÓN Y VIDEO
 function previsualizar(url, titulo) {
     const m = movies.find(x => x.title === titulo);
     videoActualUrl = url;
@@ -83,7 +148,7 @@ function lanzarReproductor() {
     document.getElementById('sc-pre-video').classList.add('hidden');
     document.getElementById('video-player-final').classList.remove('hidden');
     const container = document.getElementById('video-canvas');
-    container.innerHTML = `<video id="v-core" style="width:100%; height:100%;"></video>`;
+    container.innerHTML = `<video id="v-core" style="width:100%; height:100%;" autoplay></video>`;
     const video = document.getElementById('v-core');
 
     if (videoActualUrl.includes('.m3u8') && Hls.isSupported()) {
@@ -100,15 +165,18 @@ function showControls() {
     const gui = document.getElementById('player-gui');
     gui.classList.remove('fade-out');
     clearTimeout(guiTimeout);
-    guiTimeout = setTimeout(() => gui.classList.add('fade-out'), 3000);
+    guiTimeout = setTimeout(() => gui.classList.add('fade-out'), 4000);
 }
 
 function togglePlayPause() {
     const v = document.getElementById('v-core');
-    if (v.paused) v.play(); else v.pause();
+    if (v.paused) { v.play(); document.getElementById('btn-play-pause').innerText = "⏸"; } 
+    else { v.pause(); document.getElementById('btn-play-pause').innerText = "▶"; }
     showControls();
 }
+
 function skip(t) { document.getElementById('v-core').currentTime += t; showControls(); }
+
 function cerrarReproductorFinal() {
     const v = document.getElementById('v-core');
     if(v) { v.pause(); v.src = ""; }
@@ -116,3 +184,5 @@ function cerrarReproductorFinal() {
     document.getElementById('video-player-final').classList.add('hidden');
     document.getElementById('sc-main').classList.remove('hidden');
 }
+
+window.onload = () => document.getElementById('log-u').focus();
