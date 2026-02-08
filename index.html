@@ -9,75 +9,77 @@
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="main-bg">
 
     <div id="sc-login" class="screen">
-        <div class="login-overlay">
-            <div class="login-box">
+        <div class="glass-overlay">
+            <div class="login-box content-box">
                 <h1 class="logo-title">NEBULA<span>+</span></h1>
-                <p class="login-subtitle">Inicia sesión con tu cuenta</p>
-                <input type="text" id="log-u" class="tv-focusable" placeholder="Usuario">
-                <input type="password" id="log-p" class="tv-focusable" placeholder="Contraseña">
-                <button class="btn-primary tv-focusable" onclick="entrar()">ENTRAR</button>
+                <p class="subtitle">Inicia sesión con tu cuenta</p>
+                <div class="form-container">
+                    <input type="text" id="log-u" class="tv-focusable" placeholder="Usuario">
+                    <input type="password" id="log-p" class="tv-focusable" placeholder="Contraseña">
+                    <button class="btn-primary tv-focusable" onclick="entrar()">ENTRAR</button>
+                </div>
             </div>
         </div>
     </div>
 
     <div id="sc-main" class="screen hidden">
-        <nav class="navbar">
+        <nav class="navbar glass-nav">
             <div class="nav-top">
-                <span class="logo-title" style="font-size: 26px; margin:0;">NEBULA<span>+</span></span>
-                
+                <h1 class="logo-title" style="font-size: 24px;">NEBULA<span>+</span></h1>
                 <div class="search-area">
                     <input type="text" id="search-box" class="tv-focusable" placeholder="Buscar..." oninput="buscar()">
                 </div>
-
                 <div class="user-zone">
                     <button class="avatar tv-focusable" onclick="toggleMenu()">👤</button>
-                    <div id="drop-menu" class="dropdown hidden">
+                    <div id="drop-menu" class="dropdown hidden content-box">
                         <div class="u-greeting" id="u-name">Hola</div>
                         <button class="btn-logout tv-focusable" onclick="cerrarSesion()">Cerrar Sesión</button>
                     </div>
                 </div>
             </div>
             <div class="brand-bar">
-                <button class="tv-focusable" onclick="seleccionarMarca('disney')">DISNEY</button>
-                <button class="tv-focusable" onclick="seleccionarMarca('netflix')">NETFLIX</button>
-                <button class="tv-focusable" onclick="seleccionarMarca('hbo')">HBO MAX</button>
-                <button class="tv-focusable" onclick="seleccionarMarca('paramount')">PARAMOUNT</button>
-                <button class="tv-focusable" onclick="seleccionarMarca('apple')">APPLE TV</button>
-                <button class="tv-focusable" onclick="seleccionarMarca('espn')">ESPN</button>
-                <button class="tv-focusable" onclick="seleccionarMarca('natgeo')">NAT GEO</button>
+                <button class="tv-focusable brand-btn" onclick="seleccionarMarca('disney')">DISNEY</button>
+                <button class="tv-focusable brand-btn" onclick="seleccionarMarca('netflix')">NETFLIX</button>
+                <button class="tv-focusable brand-btn" onclick="seleccionarMarca('hbo')">HBO MAX</button>
+                <button class="tv-focusable brand-btn" onclick="seleccionarMarca('paramount')">PARAMOUNT</button>
+                <button class="tv-focusable brand-btn" onclick="seleccionarMarca('apple')">APPLE TV</button>
+                <button class="tv-focusable brand-btn" onclick="seleccionarMarca('espn')">ESPN</button>
+                <button class="tv-focusable brand-btn" onclick="seleccionarMarca('natgeo')">NAT GEO</button>
             </div>
         </nav>
-        <div class="filter-bar">
-            <button id="t-peli" class="tv-focusable filter-btn active" onclick="cambiarTipo('pelicula')">PELÍCULAS</button>
-            <button id="t-serie" class="tv-focusable filter-btn" onclick="cambiarTipo('serie')">SERIES</button>
-        </div>
-        <h2 id="cat-title" style="margin-left: 40px; font-size: 18px; color: #8f98b2; text-transform: uppercase; margin-top: 10px;"></h2>
-        <div class="movie-grid" id="grid"></div>
-    </div>
-
-    <div id="sc-pre-video" class="screen hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 2500; background-size: cover; background-position: center;">
-        <div style="height: 100vh; width: 100%; background: linear-gradient(to right, rgba(4,7,20,0.95) 20%, transparent 100%); display: flex; flex-direction: column; justify-content: center; padding: 100px; box-sizing: border-box;">
-            <h1 id="pre-title" style="font-size: 50px; margin-bottom: 25px; text-transform: uppercase;"></h1>
-            <button id="btn-main-play" class="tv-focusable" onclick="lanzarReproductor()" style="background: white; color: black; border: none; padding: 15px 50px; font-size: 20px; font-weight: bold; border-radius: 5px; width: fit-content;">▶ VER</button>
-        </div>
-    </div>
-
-    <div id="video-player-final" class="player-overlay hidden" style="z-index: 3000;">
-        <div id="video-canvas" style="width:100%; height:100%;"></div>
-        <div id="player-gui" class="gui-layer fade-out">
-            <div style="padding: 40px;"><span id="video-title-ui" style="font-size: 24px;"></span></div>
-            <div style="display: flex; justify-content: center; gap: 50px;">
-                <button class="tv-focusable btn-p" onclick="skip(-10)">⏪</button>
-                <button id="btn-play-pause" class="tv-focusable btn-p" onclick="togglePlayPause()">⏸</button>
-                <button class="tv-focusable btn-p" onclick="skip(10)">⏩</button>
+        
+        <div class="content-wrapper">
+            <div class="filter-bar">
+                <button id="t-peli" class="tv-focusable filter-btn active" onclick="cambiarTipo('pelicula')">PELÍCULAS</button>
+                <button id="t-serie" class="tv-focusable filter-btn" onclick="cambiarTipo('serie')">SERIES</button>
             </div>
-            <div style="padding: 60px;">
-                <div style="width:100%; height:4px; background:rgba(255,255,255,0.2); border-radius:10px;">
-                    <div id="progress-bar-new" style="width:0%; height:100%; background:white;"></div>
-                </div>
+            <h2 id="cat-title" class="section-title"></h2>
+            <div class="movie-grid" id="grid"></div>
+        </div>
+    </div>
+
+    <div id="sc-pre-video" class="screen hidden" style="position: fixed; top:0; left:0; width:100%; height:100%; z-index:2500; background-size:cover; background-position:center;">
+        <div class="glass-overlay-side">
+            <h1 id="pre-title" class="hero-title"></h1>
+            <div class="button-group">
+                <button id="btn-main-play" class="tv-focusable btn-white" onclick="lanzarReproductor()">▶ VER</button>
+                <button id="btn-pre-back" class="tv-focusable btn-outline" onclick="volverAlCatalogo()">ATRÁS</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="video-player-final" class="player-overlay hidden" style="z-index:3000;">
+        <div id="video-canvas" style="width:100%; height:100%;"></div>
+        <div id="player-gui" class="gui-layer"> 
+            <div class="gui-top">
+                <span id="video-title-ui" style="font-size: 24px;"></span>
+                <button class="tv-focusable btn-close-player" onclick="cerrarReproductorAFicha()">✕ CERRAR</button>
+            </div>
+            <div class="gui-bottom">
+                <div class="progress-container"><div id="progress-bar-new" class="progress-bar"></div></div>
             </div>
         </div>
     </div>
