@@ -2,15 +2,11 @@ const firebaseConfig = { databaseURL: "https://nebula-plus-app-default-rtdb.fire
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-let users = []; 
-let movies = []; 
-let currentBrand = 'disney'; 
-let currentType = 'pelicula';
-let videoActualUrl = ""; 
-let hlsInstance = null;
+let users = []; let movies = []; let currentBrand = 'disney'; let currentType = 'pelicula';
+let videoActualUrl = ""; let hlsInstance = null;
 
 // ==========================================
-// CONTROL REMOTO - NAVEGACIÓN INTELIGENTE
+// CONTROL REMOTO - NAVEGACIÓN Y PLAY/PAUSE
 // ==========================================
 document.addEventListener('keydown', (e) => {
     const activeScreen = document.querySelector('.screen:not(.hidden), .player-overlay:not(.hidden)');
@@ -20,15 +16,32 @@ document.addEventListener('keydown', (e) => {
     let index = focusables.indexOf(document.activeElement);
     const cols = 8; 
 
-    // Referencias de elementos clave
     const elActivo = document.activeElement;
     const esPoster = elActivo.classList.contains('poster');
     const esBuscador = elActivo.id === 'search-box';
-    const esAvatar = elActivo.classList.contains('avatar');
+    const esPlayer = !document.getElementById('video-player-final').classList.contains('hidden');
+    const esBotonCerrar = elActivo.classList.contains('btn-close-player');
+
+    // --- LÓGICA DE PAUSA/PLAY VS CERRAR ---
+    if (e.key === 'Enter' && esPlayer) {
+        e.preventDefault();
+        // Si el usuario NO está encima del botón cerrar, pausamos el video
+        if (!esBotonCerrar) {
+            const video = document.getElementById('v-core');
+            if (video) {
+                if (video.paused) video.play();
+                else video.pause();
+            }
+            return; 
+        } else {
+            // Si el foco SI está en el botón cerrar, ejecutamos el cierre
+            cerrarReproductorAFicha();
+            return;
+        }
+    }
 
     if (e.key === 'ArrowRight') {
         e.preventDefault();
-        // Si estamos en el buscador, saltar directo al icono de usuario
         if (esBuscador) {
             const avatar = document.querySelector('.avatar');
             if (avatar) avatar.focus();
@@ -45,12 +58,8 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowDown') {
         e.preventDefault();
         if (esPoster) {
-            // Navegar entre filas de posters
-            if (index + cols < focusables.length) {
-                focusables[index + cols].focus();
-            }
-        } else {
-            // Si estamos arriba (marcas/buscador/usuario), bajar al primer poster visible
+            if (index + cols < focusables.length) focusables[index + cols].focus();
+        } else if (!esPlayer) {
             const primerPoster = document.querySelector('.poster');
             if (primerPoster) primerPoster.focus();
         }
@@ -59,20 +68,19 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowUp') {
         e.preventDefault();
         if (esPoster) {
-            // Si estamos en la primera fila de posters, subir directo al buscador
-            const filaActual = Array.from(document.querySelectorAll('.poster')).indexOf(elActivo);
+            const posters = Array.from(document.querySelectorAll('.poster'));
+            const filaActual = posters.indexOf(elActivo);
             if (filaActual < cols) {
                 document.getElementById('search-box').focus();
             } else {
                 focusables[index - cols].focus();
             }
-        } else {
-            // Navegación simple en la zona superior
+        } else if (!esPlayer) {
             if (index > 0) focusables[index - 1].focus();
         }
     }
 
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !esPlayer) {
         e.preventDefault();
         if (elActivo) elActivo.click();
     }
@@ -83,10 +91,7 @@ document.addEventListener('keydown', (e) => {
 // ==========================================
 function buscar() {
     const q = document.getElementById('search-box').value.toLowerCase();
-    if (q.trim() === "") { 
-        actualizarVista(); 
-        return; 
-    }
+    if (q.trim() === "") { actualizarVista(); return; }
     const filtrados = movies.filter(m => m.title.toLowerCase().includes(q));
     document.getElementById('cat-title').innerText = "Resultados: " + q;
     renderGrid(filtrados);
@@ -103,11 +108,8 @@ function entrar() {
         document.getElementById('u-name').innerText = "Hola, " + u;
         document.getElementById('sc-login').classList.add('hidden');
         document.getElementById('sc-main').classList.remove('hidden');
-        // Al entrar, poner el foco en el buscador para acceso rápido
         setTimeout(() => document.getElementById('search-box').focus(), 300);
-    } else { 
-        alert("Acceso denegado"); 
-    }
+    } else { alert("Acceso denegado"); }
 }
 
 function cerrarSesion() {
@@ -119,9 +121,7 @@ function cerrarSesion() {
     setTimeout(() => document.getElementById('log-u').focus(), 100);
 }
 
-function toggleMenu() { 
-    document.getElementById('drop-menu').classList.toggle('hidden'); 
-}
+function toggleMenu() { document.getElementById('drop-menu').classList.toggle('hidden'); }
 
 // ==========================================
 // NAVEGACIÓN Y REPRODUCTOR
@@ -154,11 +154,7 @@ db.ref('movies').on('value', snap => {
     actualizarVista();
 });
 
-function seleccionarMarca(b) { 
-    currentBrand = b; 
-    actualizarVista(); 
-}
-
+function seleccionarMarca(b) { currentBrand = b; actualizarVista(); }
 function cambiarTipo(t) { 
     currentType = t; 
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -194,23 +190,21 @@ function lanzarReproductor() {
     document.getElementById('sc-pre-video').classList.add('hidden');
     document.getElementById('video-player-final').classList.remove('hidden');
     const container = document.getElementById('video-canvas');
-    container.innerHTML = `<video id="v-core" style="width:100%; height:100%;" autoplay></video>`;
+    container.innerHTML = `<video id="v-core" class="tv-focusable" style="width:100%; height:100%;" autoplay></video>`;
     const video = document.getElementById('v-core');
 
     if (videoActualUrl.includes('.m3u8') && Hls.isSupported()) {
-        hlsInstance = new Hls(); 
-        hlsInstance.loadSource(videoActualUrl); 
-        hlsInstance.attachMedia(video);
-    } else { 
-        video.src = videoActualUrl; 
-    }
+        hlsInstance = new Hls(); hlsInstance.loadSource(videoActualUrl); hlsInstance.attachMedia(video);
+    } else { video.src = videoActualUrl; }
 
     document.getElementById('video-title-ui').innerText = document.getElementById('pre-title').innerText;
     video.ontimeupdate = () => { 
         const bar = document.getElementById('progress-bar-new');
         if(bar) bar.style.width = (video.currentTime / video.duration) * 100 + "%"; 
     };
-    setTimeout(() => document.querySelector('.btn-close-player').focus(), 300);
+
+    // MUY IMPORTANTE: Ponemos el foco inicial en el VIDEO, no en el botón cerrar
+    setTimeout(() => video.focus(), 300);
 }
 
 window.onload = () => document.getElementById('log-u').focus();
