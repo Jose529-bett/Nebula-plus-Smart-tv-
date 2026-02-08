@@ -19,28 +19,27 @@ document.addEventListener('keydown', (e) => {
     const elActivo = document.activeElement;
     const esPoster = elActivo.classList.contains('poster');
     const esBuscador = elActivo.id === 'search-box';
-    const esPlayer = !document.getElementById('video-player-final').classList.contains('hidden');
+    const esPlayerActivo = !document.getElementById('video-player-final').classList.contains('hidden');
     const esBotonCerrar = elActivo.classList.contains('btn-close-player');
+    const esVideoCore = elActivo.id === 'v-core';
 
     // --- LÓGICA DE PAUSA/PLAY VS CERRAR ---
-    if (e.key === 'Enter' && esPlayer) {
+    if (e.key === 'Enter' && esPlayerActivo) {
         e.preventDefault();
-        // Si el usuario NO está encima del botón cerrar, pausamos el video
-        if (!esBotonCerrar) {
+        if (esVideoCore) {
             const video = document.getElementById('v-core');
             if (video) {
                 if (video.paused) video.play();
                 else video.pause();
             }
-            return; 
-        } else {
-            // Si el foco SI está en el botón cerrar, ejecutamos el cierre
+        } else if (esBotonCerrar) {
             cerrarReproductorAFicha();
-            return;
         }
+        return;
     }
 
     if (e.key === 'ArrowRight') {
+        if (esPlayerActivo) return; // Bloquear lateral en player si no hay más botones
         e.preventDefault();
         if (esBuscador) {
             const avatar = document.querySelector('.avatar');
@@ -51,15 +50,19 @@ document.addEventListener('keydown', (e) => {
     }
 
     if (e.key === 'ArrowLeft') {
+        if (esPlayerActivo) return;
         e.preventDefault();
         if (index > 0) focusables[index - 1].focus();
     }
 
     if (e.key === 'ArrowDown') {
         e.preventDefault();
-        if (esPoster) {
+        if (esPlayerActivo) {
+            // Si estamos en el botón cerrar, bajar el foco al video para poder pausar
+            document.getElementById('v-core').focus();
+        } else if (esPoster) {
             if (index + cols < focusables.length) focusables[index + cols].focus();
-        } else if (!esPlayer) {
+        } else {
             const primerPoster = document.querySelector('.poster');
             if (primerPoster) primerPoster.focus();
         }
@@ -67,20 +70,22 @@ document.addEventListener('keydown', (e) => {
 
     if (e.key === 'ArrowUp') {
         e.preventDefault();
-        if (esPoster) {
-            const posters = Array.from(document.querySelectorAll('.poster'));
-            const filaActual = posters.indexOf(elActivo);
+        if (esPlayerActivo) {
+            // Si estamos en el video, subir el foco al botón cerrar
+            document.querySelector('.btn-close-player').focus();
+        } else if (esPoster) {
+            const filaActual = Array.from(document.querySelectorAll('.poster')).indexOf(elActivo);
             if (filaActual < cols) {
                 document.getElementById('search-box').focus();
             } else {
                 focusables[index - cols].focus();
             }
-        } else if (!esPlayer) {
+        } else {
             if (index > 0) focusables[index - 1].focus();
         }
     }
 
-    if (e.key === 'Enter' && !esPlayer) {
+    if (e.key === 'Enter' && !esPlayerActivo) {
         e.preventDefault();
         if (elActivo) elActivo.click();
     }
@@ -124,11 +129,29 @@ function cerrarSesion() {
 function toggleMenu() { document.getElementById('drop-menu').classList.toggle('hidden'); }
 
 // ==========================================
-// NAVEGACIÓN Y REPRODUCTOR
+// REPRODUCTOR
 // ==========================================
-function volverAlCatalogo() {
+function lanzarReproductor() {
     document.getElementById('sc-pre-video').classList.add('hidden');
-    document.getElementById('sc-main').classList.remove('hidden');
+    document.getElementById('video-player-final').classList.remove('hidden');
+    const container = document.getElementById('video-canvas');
+    
+    // El video ahora tiene la clase tv-focusable para recibir el foco
+    container.innerHTML = `<video id="v-core" class="tv-focusable" tabindex="0" style="width:100%; height:100%;" autoplay></video>`;
+    const video = document.getElementById('v-core');
+
+    if (videoActualUrl.includes('.m3u8') && Hls.isSupported()) {
+        hlsInstance = new Hls(); hlsInstance.loadSource(videoActualUrl); hlsInstance.attachMedia(video);
+    } else { video.src = videoActualUrl; }
+
+    document.getElementById('video-title-ui').innerText = document.getElementById('pre-title').innerText;
+    video.ontimeupdate = () => { 
+        const bar = document.getElementById('progress-bar-new');
+        if(bar) bar.style.width = (video.currentTime / video.duration) * 100 + "%"; 
+    };
+
+    // Foco inicial al video para pausar con OK de inmediato
+    setTimeout(() => video.focus(), 300);
 }
 
 function cerrarReproductorAFicha() {
@@ -141,7 +164,7 @@ function cerrarReproductorAFicha() {
 }
 
 // ==========================================
-// CARGA DE DATOS (FIREBASE)
+// FIREBASE Y RENDERS (RESTO DEL CÓDIGO)
 // ==========================================
 db.ref('users').on('value', snap => {
     const data = snap.val(); users = [];
@@ -186,25 +209,9 @@ function previsualizar(url, titulo) {
     setTimeout(() => document.getElementById('btn-main-play').focus(), 200);
 }
 
-function lanzarReproductor() {
+function volverAlCatalogo() {
     document.getElementById('sc-pre-video').classList.add('hidden');
-    document.getElementById('video-player-final').classList.remove('hidden');
-    const container = document.getElementById('video-canvas');
-    container.innerHTML = `<video id="v-core" class="tv-focusable" style="width:100%; height:100%;" autoplay></video>`;
-    const video = document.getElementById('v-core');
-
-    if (videoActualUrl.includes('.m3u8') && Hls.isSupported()) {
-        hlsInstance = new Hls(); hlsInstance.loadSource(videoActualUrl); hlsInstance.attachMedia(video);
-    } else { video.src = videoActualUrl; }
-
-    document.getElementById('video-title-ui').innerText = document.getElementById('pre-title').innerText;
-    video.ontimeupdate = () => { 
-        const bar = document.getElementById('progress-bar-new');
-        if(bar) bar.style.width = (video.currentTime / video.duration) * 100 + "%"; 
-    };
-
-    // MUY IMPORTANTE: Ponemos el foco inicial en el VIDEO, no en el botón cerrar
-    setTimeout(() => video.focus(), 300);
+    document.getElementById('sc-main').classList.remove('hidden');
 }
 
 window.onload = () => document.getElementById('log-u').focus();
