@@ -10,7 +10,7 @@ let videoActualUrl = "";
 let hlsInstance = null;
 
 // ==========================================
-// CONTROL REMOTO - NAVEGACIÓN (8 COLUMNAS)
+// CONTROL REMOTO - NAVEGACIÓN INTELIGENTE
 // ==========================================
 document.addEventListener('keydown', (e) => {
     const activeScreen = document.querySelector('.screen:not(.hidden), .player-overlay:not(.hidden)');
@@ -20,45 +20,80 @@ document.addEventListener('keydown', (e) => {
     let index = focusables.indexOf(document.activeElement);
     const cols = 8; 
 
-    if (e.key === 'ArrowRight') index++;
-    if (e.key === 'ArrowLeft') index--;
-    if (e.key === 'ArrowDown') {
-        index = (document.activeElement.classList.contains('poster')) ? index + cols : index + 1;
-    }
-    if (e.key === 'ArrowUp') {
-        index = (document.activeElement.classList.contains('poster')) ? index - cols : index - 1;
+    // Referencias de elementos clave
+    const elActivo = document.activeElement;
+    const esPoster = elActivo.classList.contains('poster');
+    const esBuscador = elActivo.id === 'search-box';
+    const esAvatar = elActivo.classList.contains('avatar');
+
+    if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        // Si estamos en el buscador, saltar directo al icono de usuario
+        if (esBuscador) {
+            const avatar = document.querySelector('.avatar');
+            if (avatar) avatar.focus();
+        } else if (index < focusables.length - 1) {
+            focusables[index + 1].focus();
+        }
     }
 
-    if (focusables[index]) { 
-        e.preventDefault(); 
-        focusables[index].focus(); 
+    if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        if (index > 0) focusables[index - 1].focus();
+    }
+
+    if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (esPoster) {
+            // Navegar entre filas de posters
+            if (index + cols < focusables.length) {
+                focusables[index + cols].focus();
+            }
+        } else {
+            // Si estamos arriba (marcas/buscador/usuario), bajar al primer poster visible
+            const primerPoster = document.querySelector('.poster');
+            if (primerPoster) primerPoster.focus();
+        }
+    }
+
+    if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (esPoster) {
+            // Si estamos en la primera fila de posters, subir directo al buscador
+            const filaActual = Array.from(document.querySelectorAll('.poster')).indexOf(elActivo);
+            if (filaActual < cols) {
+                document.getElementById('search-box').focus();
+            } else {
+                focusables[index - cols].focus();
+            }
+        } else {
+            // Navegación simple en la zona superior
+            if (index > 0) focusables[index - 1].focus();
+        }
     }
 
     if (e.key === 'Enter') {
         e.preventDefault();
-        if (document.activeElement) document.activeElement.click();
+        if (elActivo) elActivo.click();
     }
 });
 
 // ==========================================
-// BUSCADOR EN TIEMPO REAL (PERMITE BORRAR)
+// BUSCADOR EN TIEMPO REAL
 // ==========================================
 function buscar() {
     const q = document.getElementById('search-box').value.toLowerCase();
-    
-    // Si el campo está vacío (al borrar), vuelve a la marca/tipo seleccionado
     if (q.trim() === "") { 
         actualizarVista(); 
         return; 
     }
-    
     const filtrados = movies.filter(m => m.title.toLowerCase().includes(q));
     document.getElementById('cat-title').innerText = "Resultados: " + q;
     renderGrid(filtrados);
 }
 
 // ==========================================
-// GESTIÓN DE SESIÓN Y MENÚ
+// GESTIÓN DE SESIÓN
 // ==========================================
 function entrar() {
     const u = document.getElementById('log-u').value;
@@ -68,14 +103,14 @@ function entrar() {
         document.getElementById('u-name').innerText = "Hola, " + u;
         document.getElementById('sc-login').classList.add('hidden');
         document.getElementById('sc-main').classList.remove('hidden');
-        setTimeout(() => document.querySelector('.brand-btn').focus(), 300);
+        // Al entrar, poner el foco en el buscador para acceso rápido
+        setTimeout(() => document.getElementById('search-box').focus(), 300);
     } else { 
         alert("Acceso denegado"); 
     }
 }
 
 function cerrarSesion() {
-    // Regresa al login y limpia campos
     document.getElementById('sc-main').classList.add('hidden');
     document.getElementById('sc-login').classList.remove('hidden');
     document.getElementById('drop-menu').classList.add('hidden');
@@ -89,7 +124,7 @@ function toggleMenu() {
 }
 
 // ==========================================
-// NAVEGACIÓN ENTRE PANTALLAS
+// NAVEGACIÓN Y REPRODUCTOR
 // ==========================================
 function volverAlCatalogo() {
     document.getElementById('sc-pre-video').classList.add('hidden');
@@ -100,10 +135,8 @@ function cerrarReproductorAFicha() {
     const v = document.getElementById('v-core');
     if(v) { v.pause(); v.src = ""; }
     if(hlsInstance) hlsInstance.destroy();
-    
     document.getElementById('video-player-final').classList.add('hidden');
     document.getElementById('sc-pre-video').classList.remove('hidden');
-    // Foco automático al botón VER para el control remoto
     setTimeout(() => document.getElementById('btn-main-play').focus(), 150);
 }
 
@@ -121,9 +154,6 @@ db.ref('movies').on('value', snap => {
     actualizarVista();
 });
 
-// ==========================================
-// FILTROS Y RENDERIZADO
-// ==========================================
 function seleccionarMarca(b) { 
     currentBrand = b; 
     actualizarVista(); 
@@ -132,8 +162,7 @@ function seleccionarMarca(b) {
 function cambiarTipo(t) { 
     currentType = t; 
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    const btnId = (t === 'pelicula') ? 't-peli' : 't-serie';
-    document.getElementById(btnId).classList.add('active');
+    document.getElementById(t === 'pelicula' ? 't-peli' : 't-serie').classList.add('active');
     actualizarVista(); 
 }
 
@@ -150,31 +179,24 @@ function renderGrid(lista) {
     `).join('');
 }
 
-// ==========================================
-// PREVISUALIZACIÓN Y REPRODUCTOR
-// ==========================================
 function previsualizar(url, titulo) {
     videoActualUrl = url;
     const m = movies.find(x => x.title === titulo);
     document.getElementById('sc-main').classList.add('hidden');
-    
     const pre = document.getElementById('sc-pre-video');
     pre.style.backgroundImage = `url('${m.poster}')`;
     document.getElementById('pre-title').innerText = titulo;
     pre.classList.remove('hidden');
-    
     setTimeout(() => document.getElementById('btn-main-play').focus(), 200);
 }
 
 function lanzarReproductor() {
     document.getElementById('sc-pre-video').classList.add('hidden');
     document.getElementById('video-player-final').classList.remove('hidden');
-    
     const container = document.getElementById('video-canvas');
     container.innerHTML = `<video id="v-core" style="width:100%; height:100%;" autoplay></video>`;
     const video = document.getElementById('v-core');
 
-    // Soporte para MP4 y M3U8
     if (videoActualUrl.includes('.m3u8') && Hls.isSupported()) {
         hlsInstance = new Hls(); 
         hlsInstance.loadSource(videoActualUrl); 
@@ -184,19 +206,11 @@ function lanzarReproductor() {
     }
 
     document.getElementById('video-title-ui').innerText = document.getElementById('pre-title').innerText;
-    
-    // Barra de progreso automática
     video.ontimeupdate = () => { 
         const bar = document.getElementById('progress-bar-new');
         if(bar) bar.style.width = (video.currentTime / video.duration) * 100 + "%"; 
     };
-
-    // Foco automático al botón CERRAR único del reproductor
     setTimeout(() => document.querySelector('.btn-close-player').focus(), 300);
 }
 
-// ARRANQUE INICIAL
-window.onload = () => {
-    const loginInput = document.getElementById('log-u');
-    if(loginInput) loginInput.focus();
-};
+window.onload = () => document.getElementById('log-u').focus();
